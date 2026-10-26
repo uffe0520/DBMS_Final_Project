@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilmCraft — Cinema Tracking & Festival Curator (HKU COMP3278A)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117;
+            color: #e6edf3;
+        }
+        .serif-font {
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+        .gold-gradient {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        .cinema-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+        .cinema-card:hover {
+            transform: translateY(-3px);
+            border-color: #f59e0b;
+            box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="border-b border-gray-800 bg-[#161b22]/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg gold-gradient flex items-center justify-center text-slate-950 font-black text-xl shadow-lg">
+                    <i class="fa-solid fa-film"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-bold tracking-tight text-white serif-font">FilmCraft</span>
+                    <span class="ml-2 text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-medium border border-amber-500/30">HKU COMP3278A</span>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex space-x-1 sm:space-x-2">
+                <button onclick="switchTab('movies')" id="tab-movies" class="nav-btn px-3 py-1.5 rounded-md text-sm font-medium transition text-amber-400 bg-gray-800">
+                    <i class="fa-solid fa-clapperboard mr-1.5"></i>Films
+                </button>
+                <button onclick="switchTab('screenings')" id="tab-screenings" class="nav-btn px-3 py-1.5 rounded-md text-sm font-medium transition text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-ticket mr-1.5"></i>Theaters
+                </button>
+                <button onclick="switchTab('division')" id="tab-division" class="nav-btn px-3 py-1.5 rounded-md text-sm font-medium transition text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-brain mr-1.5"></i>Division (R ÷ S)
+                </button>
+                <button onclick="switchTab('directors')" id="tab-directors" class="nav-btn px-3 py-1.5 rounded-md text-sm font-medium transition text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-award mr-1.5"></i>Directors
+                </button>
+                <button onclick="switchTab('review')" id="tab-review" class="nav-btn px-3 py-1.5 rounded-md text-sm font-medium transition text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-pen-fancy mr-1.5"></i>Log Review
+                </button>
+                <button onclick="switchTab('security')" id="tab-security" class="nav-btn px-3 py-1.5 rounded-md text-sm font-medium transition text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-shield-halved mr-1.5"></i>Security (Ch 7)
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- TAB 1: MOVIES & FRANCHISES -->
+        <section id="section-movies" class="tab-section">
+            <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-gray-800 gap-4">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-white serif-font tracking-tight">Movie Catalog & Franchise Lineage</h1>
+                    <p class="text-gray-400 text-sm mt-1">Multi-table relational schema with self-referencing prequels and multi-valued genres.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs bg-gray-800 text-gray-300 px-3 py-1.5 rounded border border-gray-700">
+                        <i class="fa-solid fa-database text-amber-400 mr-1.5"></i>Live MySQL Connection
+                    </span>
+                </div>
+            </div>
+
+            <!-- Movies Grid -->
+            <div id="movies-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                <!-- Injected via JS -->
+                <div class="text-gray-400 animate-pulse">Loading movies from database...</div>
+            </div>
+        </section>
+
+
+        <!-- TAB 2: THEATRICAL SCREENINGS -->
+        <section id="section-screenings" class="tab-section hidden">
+            <div class="pb-6 border-b border-gray-800">
+                <h1 class="text-3xl font-extrabold text-white serif-font tracking-tight">Hong Kong Theatrical Screenings</h1>
+                <p class="text-gray-400 text-sm mt-1">Demonstrating Weak Entities (<code class="text-amber-400">TheaterRoom</code>, <code class="text-amber-400">TheaterScreening</code>) joined with Parent Theaters and Movies.</p>
+            </div>
+
+            <div class="mt-6 overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-300 border border-gray-800 rounded-lg overflow-hidden">
+                    <thead class="bg-[#161b22] text-xs uppercase text-amber-400 font-semibold border-b border-gray-800">
+                        <tr>
+                            <th class="px-6 py-4">Cinema / Theater</th>
+                            <th class="px-6 py-4">Room & Format</th>
+                            <th class="px-6 py-4">Film & Director</th>
+                            <th class="px-6 py-4">Date & Time</th>
+                            <th class="px-6 py-4">Ticket Price</th>
+                            <th class="px-6 py-4">Potential Gross</th>
+                        </tr>
+                    </thead>
+                    <tbody id="screenings-table-body" class="divide-y divide-gray-800 bg-[#0d1117]">
+                        <!-- Injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- TAB 3: RELATIONAL DIVISION (QUERY 5.1) -->
+        <section id="section-division" class="tab-section hidden">
+            <div class="pb-6 border-b border-gray-800">
+                <div class="flex items-center gap-3">
+                    <span class="px-2.5 py-1 rounded bg-purple-500/20 text-purple-400 text-xs font-bold border border-purple-500/30">TIER 5 SQL</span>
+                    <h1 class="text-3xl font-extrabold text-white serif-font tracking-tight">Relational Division Operator (R ÷ S)</h1>
+                </div>
+                <p class="text-gray-400 text-sm mt-2">
+                    Universal quantification: <span class="text-white font-medium">"Find all cinephiles who have watched and reviewed EVERY film directed by Christopher Nolan."</span>
+                </p>
+                <div class="mt-3 bg-[#161b22] p-3 rounded border border-gray-800 font-mono text-xs text-amber-300">
+                    π_{user_id}(Reviews) ÷ π_{movie_id}(σ_{name='Christopher Nolan' ∧ role='DIRECTOR'}(FilmProfessional ⨝ MovieCastCrew))
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
+                <!-- Divisor: Nolan Movies -->
+                <div class="bg-[#161b22] border border-gray-800 rounded-xl p-6">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center justify-between">
+                        <span><i class="fa-solid fa-list-check text-amber-400 mr-2"></i>Target Filmography (Divisor S)</span>
+                        <span id="nolan-count-badge" class="text-xs bg-amber-500/20 text-amber-300 px-2.5 py-1 rounded-full">5 Films Required</span>
+                    </h3>
+                    <ul id="nolan-movies-list" class="space-y-3">
+                        <!-- Injected via JS -->
+                    </ul>
+                </div>
+
+                <!-- Division Winners -->
+                <div class="bg-[#161b22] border border-gray-800 rounded-xl p-6">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center justify-between">
+                        <span><i class="fa-solid fa-trophy text-amber-400 mr-2"></i>Division Winners (Result R ÷ S)</span>
+                        <span class="text-xs bg-green-500/20 text-green-300 px-2.5 py-1 rounded-full">100% Completion</span>
+                    </h3>
+                    <div id="division-winners-container" class="space-y-4">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- TAB 4: DIRECTORS LEADERBOARD -->
+        <section id="section-directors" class="tab-section hidden">
+            <div class="pb-6 border-b border-gray-800">
+                <h1 class="text-3xl font-extrabold text-white serif-font tracking-tight">Director Hall of Fame (Tier 3 SQL)</h1>
+                <p class="text-gray-400 text-sm mt-1">Multi-table aggregation with <code class="text-amber-400">GROUP BY</code>, <code class="text-amber-400">HAVING</code>, and Festival Award counts.</p>
+            </div>
+
+            <div class="mt-6 overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-300 border border-gray-800 rounded-lg overflow-hidden">
+                    <thead class="bg-[#161b22] text-xs uppercase text-amber-400 font-semibold border-b border-gray-800">
+                        <tr>
+                            <th class="px-6 py-4">Director</th>
+                            <th class="px-6 py-4">Nationality</th>
+                            <th class="px-6 py-4">Films in Catalog</th>
+                            <th class="px-6 py-4">Community Reviews</th>
+                            <th class="px-6 py-4">Average Rating</th>
+                            <th class="px-6 py-4">Festival Awards Won</th>
+                        </tr>
+                    </thead>
+                    <tbody id="directors-table-body" class="divide-y divide-gray-800 bg-[#0d1117]">
+                        <!-- Injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- TAB 5: WRITE A REVIEW (ATOMIC TRANSACTION) -->
+        <section id="section-review" class="tab-section hidden">
+            <div class="max-w-2xl mx-auto">
+                <div class="pb-6 border-b border-gray-800 text-center">
+                    <span class="px-2.5 py-1 rounded bg-blue-500/20 text-blue-400 text-xs font-bold border border-blue-500/30">TIER 1 SQL</span>
+                    <h1 class="text-3xl font-extrabold text-white serif-font tracking-tight mt-2">Log a Review (ACID Transaction)</h1>
+                    <p class="text-gray-400 text-sm mt-1">Executes an atomic transaction updating the review record and favorite genre stats.</p>
+                </div>
+
+                <form id="review-form" onsubmit="submitReview(event)" class="mt-6 space-y-5 bg-[#161b22] p-6 rounded-xl border border-gray-800">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Select Cinephile (User)</label>
+                        <select id="input-user" class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500">
+                            <option value="1">Alex Chen (Patron Cinephile - UID: 1)</option>
+                            <option value="2">Sarah Wong (Pro Cinephile - UID: 2)</option>
+                            <option value="5">David Kim (Free Cinephile - UID: 5)</option>
+                            <option value="3">Marcus Lee (Variety Critic - UID: 3)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Select Movie</label>
+                        <select id="input-movie" class="w-full bg-[#0d1117] border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Rating (1 to 10 Stars)</label>
+                        <div class="flex items-center gap-3">
+                            <input type="range" id="input-rating" min="1" max="10" value="10" oninput="document.getElementById('rating-display').innerText = this.value + '/10'" class="flex-1 accent-amber-500">
+                            <span id="rating-display" class="font-bold text-amber-400 text-lg w-16 text-right">10/10</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Review Comments</label>
+                        <textarea id="input-text" rows="3" placeholder="Share your critical thoughts..." class="w-full bg-[#0d1117] border border-gray-700 rounded-lg p-3 text-white focus:outline-none focus:border-amber-500 text-sm"></textarea>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" id="input-spoilers" class="rounded bg-gray-800 border-gray-700 text-amber-500 focus:ring-amber-500 h-4 w-4">
+                        <label for="input-spoilers" class="ml-2 text-sm text-gray-400">Review contains plot spoilers</label>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 rounded-lg gold-gradient font-bold text-slate-950 text-sm hover:opacity-95 transition shadow-lg">
+                        <i class="fa-solid fa-paper-plane mr-2"></i>Execute Atomic Transaction
+                    </button>
+
+                    <div id="review-status" class="hidden p-3 rounded-lg text-sm text-center"></div>
+                </form>
+            </div>
+        </section>
+
+
+        <!-- TAB 6: SECURITY & ANTI-SQL INJECTION -->
+        <section id="section-security" class="tab-section hidden">
+            <div class="max-w-3xl mx-auto">
+                <div class="pb-6 border-b border-gray-800 text-center">
+                    <span class="px-2.5 py-1 rounded bg-red-500/20 text-red-400 text-xs font-bold border border-red-500/30">CHAPTER 7 SECURITY</span>
+                    <h1 class="text-3xl font-extrabold text-white serif-font tracking-tight mt-2">SQL Injection Defense Lab</h1>
+                    <p class="text-gray-400 text-sm mt-1">Live demonstration of parameterized query protection against malicious payload inputs.</p>
+                </div>
+
+                <div class="mt-6 bg-[#161b22] p-6 rounded-xl border border-gray-800">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Test Live Search Input (Try entering an injection string):</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="security-input" value="' OR '1'='1" class="flex-1 bg-[#0d1117] border border-gray-700 rounded-lg px-4 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-amber-500">
+                        <button onclick="testSecurity()" class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-sm font-medium border border-gray-600 transition">
+                            <i class="fa-solid fa-play mr-1.5 text-amber-400"></i>Test Endpoint
+                        </button>
+                    </div>
+
+                    <div class="flex gap-2 mt-3">
+                        <button onclick="setPayload('Oppenheimer')" class="text-xs bg-gray-800 text-gray-300 px-2.5 py-1 rounded hover:bg-gray-700">Valid: "Oppenheimer"</button>
+                        <button onclick="setPayload(&quot;' OR '1'='1&quot;)" class="text-xs bg-red-900/40 text-red-300 px-2.5 py-1 rounded border border-red-700/50 hover:bg-red-800/40">Attack: ' OR '1'='1</button>
+                        <button onclick="setPayload(&quot;'; DROP TABLE movies; --&quot;)" class="text-xs bg-red-900/40 text-red-300 px-2.5 py-1 rounded border border-red-700/50 hover:bg-red-800/40">Attack: DROP TABLE</button>
+                    </div>
+
+                    <!-- Security Response Box -->
+                    <div id="security-result" class="mt-6 p-4 bg-[#0d1117] border border-gray-800 rounded-lg font-mono text-xs text-gray-300 whitespace-pre-wrap overflow-x-auto">
+                        Click "Test Endpoint" to observe the prepared statement response...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 bg-[#161b22] py-6 text-center text-xs text-gray-500">
+        <p>FilmCraft Relational Cinema System — Built for HKU COMP3278A Database Management Systems</p>
+        <p class="mt-1">Dr. CHEN, Yi | School of Computing & Data Science, The University of Hong Kong</p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let cachedMovies = [];
+
+        async function fetchMovies() {
+            try {
+                const res = await fetch('/api/movies');
+                const data = await res.json();
+                if (data.success) {
+                    cachedMovies = data.data;
+                    renderMovies(data.data);
+                    populateMovieSelect(data.data);
+                }
+            } catch (err) {
+                console.error('Failed to load movies:', err);
+            }
+        }
+
+        function renderMovies(movies) {
+            const container = document.getElementById('movies-container');
+            container.innerHTML = movies.map(m => `
+                <div class="cinema-card rounded-xl p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-start justify-between gap-2">
+                            <h3 class="text-xl font-bold text-white serif-font">${m.title}</h3>
+                            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold text-xs border border-amber-500/30">
+                                <i class="fa-solid fa-star text-amber-400 mr-1"></i>${m.average_rating > 0 ? m.average_rating : 'Unrated'}
+                            </span>
+                        </div>
+                        <p class="text-xs text-amber-500/80 mt-1 font-medium">Dir. ${m.director_name || 'Unknown'} (${m.release_year}) • ${m.duration_minutes}m • ${m.language}</p>
+
+                        ${m.prequel_title ? `
+                            <div class="mt-3 p-2 bg-blue-950/40 border border-blue-800/40 rounded text-xs text-blue-300 flex items-center">
+                                <i class="fa-solid fa-link mr-1.5 text-blue-400"></i>
+                                <span>Sequel to: <strong class="text-white">${m.prequel_title}</strong></span>
+                            </div>
+                        ` : ''}
+
+                        <p class="text-xs text-gray-400 mt-3 line-clamp-3 leading-relaxed">${m.synopsis || 'No synopsis available.'}</p>
+                    </div>
+
+                    <div class="mt-5 pt-3 border-t border-gray-800 flex items-center justify-between text-xs text-gray-400">
+                        <span class="bg-gray-800 px-2 py-1 rounded text-gray-300">${m.genres || 'Drama'}</span>
+                        <span><i class="fa-regular fa-comment mr-1"></i>${m.total_reviews} reviews</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function populateMovieSelect(movies) {
+            const select = document.getElementById('input-movie');
+            select.innerHTML = movies.map(m => `<option value="${m.movie_id}">${m.title} (${m.release_year})</option>`).join('');
+        }
+
+        async function fetchScreenings() {
+            try {
+                const res = await fetch('/api/screenings');
+                const data = await res.json();
+                if (data.success) {
+                    const tbody = document.getElementById('screenings-table-body');
+                    tbody.innerHTML = data.data.map(s => `
+                        <tr class="hover:bg-gray-800/40 transition">
+                            <td class="px-6 py-4 font-medium text-white">${s.theater_name} <br><span class="text-xs text-gray-500">${s.city}</span></td>
+                            <td class="px-6 py-4">Room ${s.room_number} <span class="ml-1 text-xs px-1.5 py-0.5 rounded bg-gray-800 text-amber-400 border border-gray-700">${s.screen_format}</span><br><span class="text-xs text-gray-500">${s.seating_capacity} seats</span></td>
+                            <td class="px-6 py-4 font-semibold text-white">${s.movie_title}<br><span class="text-xs text-gray-400">Dir. ${s.director_name}</span></td>
+                            <td class="px-6 py-4 font-mono text-xs">${new Date(s.screening_datetime).toLocaleString()}</td>
+                            <td class="px-6 py-4 font-bold text-amber-400">HK$${parseFloat(s.ticket_price).toFixed(2)}</td>
+                            <td class="px-6 py-4 font-mono text-green-400">HK$${parseFloat(s.potential_gross).toFixed(2)}</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Failed to load screenings:', err);
+            }
+        }
+
+        async function fetchDivision() {
+            try {
+                const res = await fetch('/api/division/nolan');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('nolan-count-badge').innerText = `${data.total_nolan_movies} Films Required`;
+                    
+                    const moviesList = document.getElementById('nolan-movies-list');
+                    moviesList.innerHTML = data.nolan_movies.map(m => `
+                        <li class="p-3 bg-[#0d1117] border border-gray-800 rounded-lg flex items-center justify-between text-sm">
+                            <span class="text-white font-medium"><i class="fa-solid fa-film text-gray-500 mr-2"></i>${m.title}</span>
+                            <span class="text-xs text-gray-400 font-mono">${m.release_year}</span>
+                        </li>
+                    `).join('');
+
+                    const winnersContainer = document.getElementById('division-winners-container');
+                    winnersContainer.innerHTML = data.division_winners.map(w => `
+                        <div class="p-4 bg-green-950/20 border border-green-700/40 rounded-xl flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center font-bold text-lg">
+                                    ${w.username.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-white">${w.username}</h4>
+                                    <p class="text-xs text-gray-400">${w.email} • Tier: <span class="text-amber-400">${w.membership_tier}</span></p>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 rounded-full bg-green-500/20 text-green-300 text-xs font-bold border border-green-500/30">
+                                <i class="fa-solid fa-check mr-1"></i>Completed 5/5
+                            </span>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Failed to load division query:', err);
+            }
+        }
+
+        async function fetchDirectors() {
+            try {
+                const res = await fetch('/api/directors');
+                const data = await res.json();
+                if (data.success) {
+                    const tbody = document.getElementById('directors-table-body');
+                    tbody.innerHTML = data.data.map(d => `
+                        <tr class="hover:bg-gray-800/40 transition">
+                            <td class="px-6 py-4 font-bold text-white">${d.director_name}</td>
+                            <td class="px-6 py-4 text-gray-400">${d.nationality}</td>
+                            <td class="px-6 py-4">${d.total_films_directed}</td>
+                            <td class="px-6 py-4">${d.total_reviews}</td>
+                            <td class="px-6 py-4 font-bold text-amber-400"><i class="fa-solid fa-star mr-1"></i>${d.average_rating}</td>
+                            <td class="px-6 py-4"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-xs font-bold">${d.awards_won} Awards</span></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Failed to load directors:', err);
+            }
+        }
+
+        async function submitReview(event) {
+            event.preventDefault();
+            const statusDiv = document.getElementById('review-status');
+            const payload = {
+                user_id: parseInt(document.getElementById('input-user').value),
+                movie_id: parseInt(document.getElementById('input-movie').value),
+                rating: parseInt(document.getElementById('input-rating').value),
+                review_text: document.getElementById('input-text').value,
+                contains_spoilers: document.getElementById('input-spoilers').checked
+            };
+
+            statusDiv.className = 'p-3 rounded-lg text-sm text-center bg-gray-800 text-gray-300 block';
+            statusDiv.innerText = 'Executing transaction...';
+
+            try {
+                const res = await fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    statusDiv.className = 'p-3 rounded-lg text-sm text-center bg-green-900/40 text-green-300 border border-green-700/50 block';
+                    statusDiv.innerText = '✓ Success: Review recorded & favorite genre updated in MySQL via transaction!';
+                    fetchMovies();
+                    fetchDivision();
+                    fetchDirectors();
+                } else {
+                    statusDiv.className = 'p-3 rounded-lg text-sm text-center bg-red-900/40 text-red-300 border border-red-700/50 block';
+                    statusDiv.innerText = '✗ Error: ' + data.error;
+                }
+            } catch (err) {
+                statusDiv.className = 'p-3 rounded-lg text-sm text-center bg-red-900/40 text-red-300 border border-red-700/50 block';
+                statusDiv.innerText = '✗ Connection Error: ' + err.message;
+            }
+        }
+
+        function setPayload(val) {
+            document.getElementById('security-input').value = val;
+            testSecurity();
+        }
+
+        async function testSecurity() {
+            const query = document.getElementById('security-input').value;
+            const resultBox = document.getElementById('security-result');
+            resultBox.innerText = 'Sending request to parameterized endpoint...';
+
+            try {
+                const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                const data = await res.json();
+                resultBox.innerText = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resultBox.innerText = 'Error: ' + err.message;
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-amber-400', 'bg-gray-800');
+                btn.classList.add('text-gray-400');
+            });
+
+            document.getElementById(`section-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.add('text-amber-400', 'bg-gray-800');
+            activeBtn.classList.remove('text-gray-400');
+
+            if (tabId === 'screenings') fetchScreenings();
+            if (tabId === 'division') fetchDivision();
+            if (tabId === 'directors') fetchDirectors();
+        }
+
+        // Initialize on load
+        fetchMovies();
+    </script>
+</body>
+</html>

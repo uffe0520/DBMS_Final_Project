@@ -1,0 +1,27 @@
+{
+  "name": "dbms_final_project",
+  "version": "1.0.0",
+  "description": "> **Course:** HKU COMP3278A — Introduction to Database Management Systems   > **Instructor:** Dr. CHEN, Yi | School of Computing & Data Science, The University of Hong Kong   > **Repository:** `uffe0520/DBMS_Final_Project`   > **Project Scope:** Full-Stack Web Application, Production Relational Database (MySQL 8.x), 6-Tier Analytical Query Portfolio, BCNF Normalization Proofs, B+ Tree Indexing Profiling, and SQL Injection Security Architecture.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uffe0520/DBMS_Final_Project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/uffe0520/DBMS_Final_Project/issues"
+  },
+  "homepage": "https://github.com/uffe0520/DBMS_Final_Project#readme",
+  "dependencies": {
+    "express": "^5.3.0",
+    "mysql2": "^3.24.6"
+  }
+}
