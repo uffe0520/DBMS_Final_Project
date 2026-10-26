@@ -283,9 +283,15 @@ To satisfy the SQL Injection & Database Security requirement:
 
 ---
 
-## 6. Prohibited SQL Constructs (for Academic Query Portfolio)
+## 6. Strictly Forbidden / Disallowed Features (Academic Standard)
 
-For the core academic query portfolio submitted for grading:
-- ❌ **NO Window Functions:** (`ROW_NUMBER()`, `RANK()`, `DENSE_RANK()`, `OVER (PARTITION BY ...)`). Solve ranking via self-joins or correlated subqueries (`COUNT(*) WHERE score > outer.score`).
-- ❌ **NO Common Table Expressions (`WITH ... AS`):** Use derived tables in `FROM` (`(SELECT ...) AS t`).
-- ❌ **NO Vendor-specific hacks:** Keep queries ANSI/ISO SQL and MySQL 8.x compliant.
+Directly sourced from [`AGY.md`](file:///Users/nr1/Documents/HKU/DBMS/AGY.md) and [`Assignment2/AGY.md`](file:///Users/nr1/Documents/HKU/DBMS/Assignment2/AGY.md): The COMP3278A syllabus specifically restricts certain modern and vendor-specific SQL extensions in academic submissions to evaluate foundational relational algebra competence.
+
+| Forbidden Feature | Why It Is Disallowed | Required Course Alternative |
+| :--- | :--- | :--- |
+| ❌ **Common Table Expressions (`WITH ... AS (...)`)** | CTEs bypass raw relational algebra nested query evaluations. | Use **derived tables in the `FROM` clause** (`(SELECT ...) AS t`) or subqueries in `HAVING` / `WHERE`. |
+| ❌ **Window Functions (`OVER()`, `RANK()`, `ROW_NUMBER()`)** | Not part of basic relational calculus/algebra. | Use **correlated subqueries** (e.g. `COUNT(*) WHERE val > outer.val`) or self-joins to rank/partition. |
+| ❌ **Procedural SQL (Stored Procedures, Triggers, Cursors, Loops, UDFs)** | Procedural constructs hide relational logic from the query optimizer. | Implement business workflows in **pure declarative SQL + application service layer** with transactions. |
+| ❌ **Non-standard `LIMIT` for Extremal Queries** | Relying on `ORDER BY val DESC LIMIT 1` avoids demonstrating universal set comparisons. | Use **`>= ALL (SELECT ...)`**, `= (SELECT MAX(...) FROM ...)`, or `NOT EXISTS` to solve maximums/minimums. |
+| ❌ **Dynamic Date Functions in Formal Queries (`NOW()`, `CURDATE()`)** | Dynamic timestamps cause test suites to fail depending on execution time. | Use **fixed date/timestamp literals** (e.g. `'2026-08-01'`) for reproducible grading evaluation. |
+

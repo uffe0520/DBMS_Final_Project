@@ -33,10 +33,15 @@ Your dual objectives are:
   ```
 - Demonstrate this security posture explicitly in project documentation and the final presentation.
 
-### C. Course Compliance on Query Constructs
-- When writing the academic query portfolio (`sql/03_queries.sql`) and presentation examples:
-  - Prioritize **pure relational techniques**: derived tables in `FROM` (`(SELECT ...) AS sub`), correlated subqueries (`EXISTS`, `NOT EXISTS`), and set comparisons (`>= ALL`).
-  - The grading rubric heavily rewards showing that you understand how SQL executes set operations without relying on high-level vendor syntaxes like window functions (`OVER (PARTITION BY ...)`) or CTEs (`WITH ...`).
+### C. Course Compliance & Strictly Forbidden SQL Features
+Directly sourced from the course memory (`AGY.md`), the grading team strictly disallows specific modern/vendor constructs in the academic query portfolio to verify core relational understanding:
+
+- ❌ **NO Common Table Expressions (`WITH ... AS (...)`):** You MUST use derived tables in the `FROM` clause (`(SELECT ...) AS t`) or subqueries in `HAVING` / `WHERE` instead.
+- ❌ **NO Window Functions (`OVER()`, `ROW_NUMBER()`, `RANK()`, `DENSE_RANK()`):** Solve ranking or partitioning via self-joins or correlated subqueries (`COUNT(*) WHERE val > outer.val`).
+- ❌ **NO Procedural SQL (Triggers, Stored Procedures, Cursors, Loops, UDFs):** All application logic must remain in declarative SQL queries and application services wrapped in transactions.
+- ❌ **NO Non-standard `LIMIT` in place of Relational Logic:** Do NOT use `ORDER BY ... LIMIT 1` to solve extremal/maximum queries; use `>= ALL (SELECT ...)`, `= (SELECT MAX(...) FROM ...)`, or `NOT EXISTS`.
+- ❌ **NO Dynamic Date Functions in Benchmark Queries (`NOW()`, `CURDATE()`):** Use fixed date literals (e.g., `'2026-08-01'`) for reproducible evaluation across grading environments.
+- 🌐 **Language:** ALWAYS provide documentation, code comments, and query explanations in English.
 
 ---
 
