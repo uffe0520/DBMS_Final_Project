@@ -34,31 +34,36 @@ To achieve top marks (A / A+), this project must systematically demonstrate mast
 
 ---
 
-## 3. Recommended Project Domain: Multi-Vendor Food & Delivery Ecosystem
+## 3. Selected Project Domain: FilmCraft (Letterboxd+) — Cinema Club & Festival Curator
 
-While groups may choose any complex domain (e.g., Steam, Instagram, Spotify, Airbnb), the **Multi-Vendor Food & Logistics Platform (Keeta / Deliveroo / UberEats style)** is strongly recommended because it naturally incorporates all required relational complexities:
+The project implements **FilmCraft**, an enhanced Letterboxd-style cinema tracking, festival curation, and theatrical screening ecosystem. It naturally embodies all course relational modeling complexities:
 
-### Core Entities & Relationships
-1. **Users & ISA Specialization:**
-   - Superclass: `User` (`user_id`, `email`, `password_hash`, `name`, `phone`, `role`, `created_at`)
-   - Subclasses (Disjoint, Total):
-     - `Customer` (`customer_id`, `delivery_address`, `default_payment_method`)
-     - `RestaurantOwner` (`owner_id`, `business_registration_no`)
-     - `Driver` (`driver_id`, `vehicle_type`, `license_plate`, `status`)
-2. **Restaurants & Branches (Hierarchical Relationship):**
-   - `Restaurant` (`restaurant_id`, `name`, `cuisine_type`, `address`, `parent_chain_id` [self-referencing FK])
-   - Multi-valued attribute reduced table: `RestaurantTag` (`restaurant_id`, `tag_name`)
-3. **Menu Items & Categories (1:N, Category Hierarchy):**
-   - `MenuCategory` (`category_id`, `restaurant_id`, `category_name`, `display_order`)
-   - `MenuItem` (`item_id`, `restaurant_id`, `category_id`, `name`, `description`, `price`, `is_available`)
-4. **Orders & Order Items (Weak Entity / Composition):**
-   - `Order` (`order_id`, `customer_id`, `restaurant_id`, `driver_id`, `order_status`, `delivery_fee`, `total_amount`, `placed_at`)
-   - `OrderItem` (Weak Entity depending on `Order`): (`order_id`, `item_id`, `quantity`, `unit_price_at_purchase`)
-5. **Coupons & Promotions (N:M Relationship):**
-   - `Coupon` (`coupon_code`, `discount_percent`, `min_spend`, `valid_until`)
-   - `OrderCoupon` (`order_id`, `coupon_code`, `discount_applied`)
-6. **Reviews & Ratings (Multi-party Interaction):**
-   - `Review` (`review_id`, `order_id`, `customer_id`, `restaurant_id`, `rating`, `comment`, `created_at`)
+### Core Entities & Relational Design
+1. **Users & ISA Specialization Hierarchy:**
+   - **Superclass:** `User` (`user_id`, `username`, `email`, `password_hash`, `role`, `created_at`)
+   - **Subclasses (Disjoint, Total):**
+     - `Cinephile` (`user_id`, `bio`, `favorite_genre`, `membership_tier`)
+     - `FilmCritic` (`user_id`, `publication_name`, `critic_license_no`, `is_verified`)
+     - `FestivalCurator` (`user_id`, `festival_organization`, `accreditation_id`)
+2. **Movies & Franchise Hierarchy (Self-Referencing Join):**
+   - `Movie` (`movie_id`, `title`, `release_year`, `duration_minutes`, `language`, `synopsis`, `prequel_movie_id` [FK referencing `Movie.movie_id` for sequels/franchises])
+   - Multi-valued attribute reduced table: `MovieGenre` (`movie_id`, `genre_name`)
+3. **Film Professionals & Cast/Crew (N:M with Relationship Attributes):**
+   - `FilmProfessional` (`person_id`, `name`, `birth_date`, `nationality`, `biography`)
+   - `MovieCastCrew` (`movie_id`, `person_id`, `role_type` ['DIRECTOR', 'ACTOR', 'WRITER', 'CINEMATOGRAPHER'], `character_name`, `billing_order`)
+4. **Theaters & Screenings (Weak Entity Set Chain):**
+   - Strong entity: `Theater` (`theater_id`, `name`, `city`, `address`)
+   - Weak entity: `TheaterRoom` (`theater_id`, `room_number`, `capacity`, `screen_format` ['IMAX', 'STANDARD', 'DOLBY'])
+   - Event entity: `TheaterScreening` (`theater_id`, `room_number`, `screening_datetime`, `movie_id`, `ticket_price`)
+5. **Reviews & Ratings (Multi-party Interaction):**
+   - `Review` (`review_id`, `user_id`, `movie_id`, `rating` [1-10], `review_text`, `contains_spoilers`, `watch_date`, `created_at`)
+6. **Curated Watchlists (Composite User Interaction):**
+   - `Watchlist` (`list_id`, `user_id`, `title`, `description`, `is_public`, `created_at`)
+   - `WatchlistEntry` (`list_id`, `movie_id`, `rank_order`, `curator_note`)
+7. **Film Festivals & Awards (Ternary / Multi-way Relationship):**
+   - `Festival` (`festival_id`, `name`, `city`, `edition_year`)
+   - `FestivalAward` (`award_id`, `festival_id`, `category_name`)
+   - `AwardNomination` (`award_id`, `movie_id`, `person_id`, `is_winner`)
 
 ---
 
@@ -96,33 +101,33 @@ flowchart TD
 ### Phase 3: Physical DDL Schema & Seed Data Generation
 - **Deliverables:**
   - `sql/01_schema.sql`: Complete DDL with data types, `PRIMARY KEY`, composite keys, `FOREIGN KEY ... REFERENCES ... ON DELETE CASCADE / SET NULL`, `CHECK` constraints, `UNIQUE`, and `DEFAULT`.
-  - `sql/02_seed_data.sql`: Rich, realistic synthetic data (at least 20+ users, 10+ restaurants, 50+ menu items, 100+ orders, realistic status distributions).
+  - `sql/02_seed_data.sql`: Rich, realistic synthetic film data (25+ users across roles, 15+ acclaimed movies, 20+ directors/actors, 5+ cinemas in Hong Kong, 100+ reviews and screenings).
   - `sql/00_reset_db.sql`: Clean teardown and rebuild script.
 
 ### Phase 4: Core & Advanced SQL Query Portfolio
 - **Deliverables:**
   - `sql/03_queries.sql`: Containing at least 15 distinct, documented queries matching the 6-Tier requirements defined in `SQL_RULES.md`:
-    - **Tier 1:** Standard CRUD endpoints.
-    - **Tier 2:** Multi-table joins (3+ tables) with outer joins.
-    - **Tier 3:** Aggregations with `GROUP BY` and `HAVING` filters.
-    - **Tier 4:** Nested subqueries with correlated `EXISTS`, `NOT EXISTS`, and set comparisons (`>= ALL`, `IN`).
-    - **Tier 5:** Relational division ("Find customers who have ordered from ALL Japanese restaurants").
-    - **Tier 6:** Analytical Views (`CREATE VIEW`) for business dashboards.
+    - **Tier 1:** Standard CRUD endpoints (user signup, logging a review, creating a watchlist).
+    - **Tier 2:** Multi-table joins (3-5 tables: Movie, Cast, Professional, Theater, Screening) with outer joins.
+    - **Tier 3:** Aggregations with `GROUP BY` and `HAVING` filters (e.g. directors with average rating $\ge 8.0$ and $\ge 3$ films).
+    - **Tier 4:** Nested subqueries with correlated `EXISTS`, `NOT EXISTS`, and set comparisons (`>= ALL` for top-reviewed film).
+    - **Tier 5:** Relational division ("Find cinephiles who have watched and rated EVERY film directed by Christopher Nolan").
+    - **Tier 6:** Analytical Views (`CREATE VIEW`) for cinema performance and director leaderboards.
   - Formal Relational Algebra expressions written alongside key queries.
 
 ### Phase 5: Full-Stack Web Application
 - **Deliverables:**
-  - Modern web application (e.g. Next.js / React frontend + Node.js / FastAPI backend).
+  - Modern web application (React/Next.js frontend + Node.js/TypeScript backend).
   - Clean UI workflows:
-    - User/Restaurant authentication & profile.
-    - Interactive menu browsing, search, and filtering (using backend SQL).
-    - Order creation flow (transactional: creates `Order` + multiple `OrderItem` rows).
-    - Live order status update & driver assignment.
-    - Admin / Analytics Dashboard displaying live SQL aggregations, top restaurants, and revenue trends.
+    - User/Critic login & profile management.
+    - Movie catalog with genre filtering, director filmographies, and sequel timelines.
+    - Interactive review & star-rating submission (wrapped in atomic transactions).
+    - Theatrical screening schedule with seat booking simulation.
+    - Cinephile Analytics Dashboard displaying live SQL aggregations, director rankings, and festival award winners.
 
 ### Phase 6: Indexing & Performance Tuning
 - **Deliverables:**
-  - `sql/04_indexing.sql`: Explicit `CREATE INDEX` statements targeting foreign keys and high-cardinality search/filter fields (e.g. `order_status`, `placed_at`, `cuisine_type`).
+  - `sql/04_indexing.sql`: Explicit `CREATE INDEX` statements targeting foreign keys and high-cardinality search/filter fields (e.g. `release_year`, `screening_datetime`, `rating`).
   - `docs/performance_report.md`: Before-and-after query execution plans using `EXPLAIN ANALYZE` demonstrating index scan improvements.
 
 ### Phase 7: Cybersecurity Audit & Automated Testing
