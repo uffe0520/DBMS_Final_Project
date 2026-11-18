@@ -694,8 +694,9 @@ app.get('/api/division', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`====================================================`);
-    console.log(`🎬 FilmCraft Web Server is running!`);
-    console.log(`🌐 Local URL: http://localhost:${PORT}`);
-    console.log(`====================================================`);
+    console.log(``);
+    console.log(`The FilmCraft Web Server is running!`);
+    console.log(`Your Local URL: http://localhost:${PORT}`);
+    console.log(`Enjoy with joy!`);
+    console.log(``);
 });

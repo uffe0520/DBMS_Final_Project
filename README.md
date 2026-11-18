@@ -2,8 +2,7 @@
 
 > **Course:** HKU COMP3278A — Introduction to Database Management Systems  
 > **Stack:** MySQL 8.x · Node.js (Express) · HTML / Tailwind CSS  
-> **Database Scope:** 5 normalized (BCNF) relational tables with full Create, Read, Update, and Delete (CRUD) operations and 100% standard Chapter 3 SQL.
-
+> **Database Scope:** 5 relational tables with full Create, Read, Update, and Delete (CRUD) operations.
 ---
 
 ## 1. Prerequisites
@@ -67,11 +66,12 @@ npm start
 
 You should see:
 ```text
-====================================================
-🎬 FilmCraft Web Server is running!
-🌐 Local URL: http://localhost:3001
-====================================================
-✓ Connected to MySQL `filmcraft` database
+
+The FilmCraft Web Server is running!
+Your Local URL: http://localhost:3001
+Enjoy with joy!
+
+Connected to MySQL `filmcraft` database
 ```
 
 Open **[http://localhost:3001](http://localhost:3001)** in your browser.
@@ -95,8 +95,8 @@ Every table in `sql/01_schema.sql` is directly queried and mutated by the web ap
 ## 6. Application Features & Full CRUD Coverage
 
 - **Films Catalog (`Tab 1`):**
-  - **Read & Search:** Live filtering by title, director, or genre via standard `EXISTS` (`GET /api/movies?q=`).
-  - **Create:** Add a new film with director, genre, prequel, and **cross-platform drag-and-drop poster upload** saved into `posters/` (`POST /api/posters/upload`, `POST /api/movies`).
+  - **Read & Search:** Filter by title, director, or genre via standard `EXISTS` (`GET /api/movies?q=`).
+  - **Create:** Add a new film with director, genre, prequel, and image drag and drop saved into `posters/` (`POST /api/posters/upload`, `POST /api/movies`).
   - **Update:** Edit any film's metadata, director, genre, or poster (`PUT /api/movies/:id`).
   - **Delete:** Remove a film and observe cascading deletes on genres and reviews (`DELETE /api/movies/:id`).
 - **Reviews & Ratings (`Tab 2` + Film Review Modal):**
@@ -106,7 +106,7 @@ Every table in `sql/01_schema.sql` is directly queried and mutated by the web ap
   - **Delete:** Delete any review with live average-rating recalculation (`DELETE /api/reviews/:id`).
 - **Film Leaderboard (`Tab 3`):** Ranks every film by average rating, min–max range, and review volume (`GET /api/leaderboard/films`).
 - **Director Leaderboard (`Tab 4`):** Multi-table `JOIN` + `GROUP BY` + `HAVING` director ranking (`GET /api/directors`).
-- **Completionist Challenge (`Tab 5`):** Parameterized Relational Division (`NOT EXISTS ... NOT EXISTS`) finding reviewers who completed every catalogued film by any selected director (`GET /api/division?directorId=`).
+- **Completionist Challenge (`Tab 5`):** Relational Division finding reviewers who completed every catalogued film by any selected director (`GET /api/division?directorId=`).
 
 ---
 
