@@ -1,13 +1,12 @@
 -- ====================================================================
 -- FilmCraft: Core Relational Database Schema (MySQL 8.x)
 -- HKU COMP3278A — Introduction to Database Management Systems
--- 6 Normalized (BCNF) Core Tables:
+-- 5 Normalized (BCNF) Core Tables:
 --   1. users
---   2. movies
---   3. movie_genres
---   4. film_professionals
---   5. movie_cast_crew
---   6. reviews
+--   2. directors
+--   3. movies
+--   4. movie_genres
+--   5. reviews
 -- ====================================================================
 
 DROP DATABASE IF EXISTS `filmcraft`;
@@ -16,14 +15,6 @@ CREATE DATABASE `filmcraft`
   DEFAULT COLLATE utf8mb4_unicode_ci;
 
 USE `filmcraft`;
-
--- Clean teardown in reverse dependency order
-DROP TABLE IF EXISTS `reviews`;
-DROP TABLE IF EXISTS `movie_cast_crew`;
-DROP TABLE IF EXISTS `film_professionals`;
-DROP TABLE IF EXISTS `movie_genres`;
-DROP TABLE IF EXISTS `movies`;
-DROP TABLE IF EXISTS `users`;
 
 -- --------------------------------------------------------------------
 -- 1. Users (Cinephiles & Accredited Film Critics)
@@ -36,18 +27,29 @@ CREATE TABLE `users` (
     `role` ENUM('CINEPHILE', 'CRITIC') NOT NULL DEFAULT 'CINEPHILE',
     `membership_tier` ENUM('FREE', 'PRO', 'PATRON') NULL,
     `publication_name` VARCHAR(100) NULL,
-    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT `pk_users` PRIMARY KEY (`user_id`),
     CONSTRAINT `uq_users_username` UNIQUE (`username`),
     CONSTRAINT `uq_users_email` UNIQUE (`email`),
     CONSTRAINT `chk_users_role_attrs` CHECK (
         (`role` = 'CINEPHILE' AND `membership_tier` IS NOT NULL AND `publication_name` IS NULL) OR
         (`role` = 'CRITIC' AND `publication_name` IS NOT NULL AND `membership_tier` IS NULL)
-    )
-) ENGINE=InnoDB;
+    ) -- This constraint ensures that roles are disjoint.
+);
 
 -- --------------------------------------------------------------------
--- 2. Movies (Self-Referencing Franchise Lineage via prequel_movie_id)
+-- 2. Directors (1:N Relationship with Movies)
+-- --------------------------------------------------------------------
+CREATE TABLE `directors` (
+    `director_id` INT AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    `nationality` VARCHAR(50),
+    `biography` TEXT,
+    CONSTRAINT `pk_directors` PRIMARY KEY (`director_id`),
+    CONSTRAINT `uq_directors_name` UNIQUE (`name`)
+);
+
+-- --------------------------------------------------------------------
+-- 3. Movies (FK to Directors + Self-Referencing Prequel Lineage)
 -- --------------------------------------------------------------------
 CREATE TABLE `movies` (
     `movie_id` INT AUTO_INCREMENT,
@@ -57,16 +59,19 @@ CREATE TABLE `movies` (
     `language` VARCHAR(50) NOT NULL DEFAULT 'English',
     `synopsis` TEXT,
     `poster_url` VARCHAR(500) NULL,
+    `director_id` INT NULL,
     `prequel_movie_id` INT NULL,
     CONSTRAINT `pk_movies` PRIMARY KEY (`movie_id`),
     CONSTRAINT `chk_movie_year` CHECK (`release_year` >= 1888),
     CONSTRAINT `chk_movie_duration` CHECK (`duration_minutes` > 0),
+    CONSTRAINT `fk_movies_director` FOREIGN KEY (`director_id`)
+        REFERENCES `directors` (`director_id`) ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT `fk_movies_prequel` FOREIGN KEY (`prequel_movie_id`)
         REFERENCES `movies` (`movie_id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB;
+);
 
 -- --------------------------------------------------------------------
--- 3. Movie Genres (Multi-Valued Attribute Table in 1NF / BCNF)
+-- 4. Movie Genres (Multi-Valued Attribute Table in 1NF / BCNF)
 -- --------------------------------------------------------------------
 CREATE TABLE `movie_genres` (
     `movie_id` INT NOT NULL,
@@ -74,35 +79,10 @@ CREATE TABLE `movie_genres` (
     CONSTRAINT `pk_movie_genres` PRIMARY KEY (`movie_id`, `genre_name`),
     CONSTRAINT `fk_genres_movie` FOREIGN KEY (`movie_id`)
         REFERENCES `movies` (`movie_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
+);
 
 -- --------------------------------------------------------------------
--- 4. Film Professionals (Directors, Actors, Writers, Cinematographers)
--- --------------------------------------------------------------------
-CREATE TABLE `film_professionals` (
-    `person_id` INT AUTO_INCREMENT,
-    `name` VARCHAR(100) NOT NULL,
-    `nationality` VARCHAR(50),
-    `biography` TEXT,
-    CONSTRAINT `pk_film_professionals` PRIMARY KEY (`person_id`)
-) ENGINE=InnoDB;
-
--- --------------------------------------------------------------------
--- 5. Movie Cast & Crew (M:N Relationship with Descriptive Role)
--- --------------------------------------------------------------------
-CREATE TABLE `movie_cast_crew` (
-    `movie_id` INT NOT NULL,
-    `person_id` INT NOT NULL,
-    `role_type` ENUM('DIRECTOR', 'ACTOR', 'WRITER', 'CINEMATOGRAPHER') NOT NULL,
-    CONSTRAINT `pk_movie_cast_crew` PRIMARY KEY (`movie_id`, `person_id`, `role_type`),
-    CONSTRAINT `fk_cast_movie` FOREIGN KEY (`movie_id`)
-        REFERENCES `movies` (`movie_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_cast_person` FOREIGN KEY (`person_id`)
-        REFERENCES `film_professionals` (`person_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
-
--- --------------------------------------------------------------------
--- 6. Reviews (User M:N Movie with Rating 0-5 Stars & Critique Text)
+-- 5. Reviews (User M:N Movie with Rating 0-5 Stars & Critique Text)
 -- --------------------------------------------------------------------
 CREATE TABLE `reviews` (
     `review_id` INT AUTO_INCREMENT,
@@ -111,8 +91,6 @@ CREATE TABLE `reviews` (
     `rating` INT NOT NULL,
     `review_text` TEXT,
     `contains_spoilers` BOOLEAN NOT NULL DEFAULT FALSE,
-    `watch_date` DATE NOT NULL,
-    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT `pk_reviews` PRIMARY KEY (`review_id`),
     CONSTRAINT `uq_user_movie_review` UNIQUE (`user_id`, `movie_id`),
     CONSTRAINT `chk_review_rating` CHECK (`rating` BETWEEN 0 AND 5),
@@ -120,4 +98,4 @@ CREATE TABLE `reviews` (
         REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_reviews_movie` FOREIGN KEY (`movie_id`)
         REFERENCES `movies` (`movie_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
+);

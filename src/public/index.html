@@ -193,17 +193,20 @@
             <button onclick="switchTab('reviews')" id="tab-reviews" class="nav-item w-full flex items-center p-3 text-left transition text-stone-700 hover:bg-stone-50 border-l-2 border-transparent">
                 <span class="text-xs uppercase tracking-wider">2. Reviews & Ratings</span>
             </button>
+            <button onclick="switchTab('film-leaderboard')" id="tab-film-leaderboard" class="nav-item w-full flex items-center p-3 text-left transition text-stone-700 hover:bg-stone-50 border-l-2 border-transparent">
+                <span class="text-xs uppercase tracking-wider">3. Film Leaderboard</span>
+            </button>
             <button onclick="switchTab('directors')" id="tab-directors" class="nav-item w-full flex items-center p-3 text-left transition text-stone-700 hover:bg-stone-50 border-l-2 border-transparent">
-                <span class="text-xs uppercase tracking-wider">3. Director Leaderboard</span>
+                <span class="text-xs uppercase tracking-wider">4. Director Leaderboard</span>
             </button>
             <button onclick="switchTab('division')" id="tab-division" class="nav-item w-full flex items-center p-3 text-left transition text-stone-700 hover:bg-stone-50 border-l-2 border-transparent">
-                <span class="text-xs uppercase tracking-wider">4. Completionist Challenge</span>
+                <span class="text-xs uppercase tracking-wider">5. Completionist Challenge</span>
             </button>
         </nav>
 
         <div class="p-5 border-t border-stone-200 bg-stone-50 text-[11px] text-stone-500 leading-relaxed font-serif">
             <strong class="text-stone-900 block font-sans text-xs uppercase mb-1">Core Relational Archive</strong>
-            Full Create, Read, Update, and Delete operations backed by 6 normalized MySQL tables.
+            Full Create, Read, Update, and Delete operations backed by 5 normalized MySQL tables.
         </div>
     </aside>
 
@@ -309,7 +312,26 @@
                             <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider">Poster Image (Optional)</label>
                             <span class="text-[10px] text-stone-500 font-serif italic">Leave empty to use the default blank archive poster</span>
                         </div>
-                        <input type="text" id="movie-input-poster" placeholder="e.g. /posters/my_film.jpg or https://... (or leave blank)" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
+                        <div
+                            id="add-poster-dropzone"
+                            class="border border-dashed border-stone-400 bg-white p-4 flex items-center justify-between gap-4 cursor-pointer hover:border-stone-900 transition"
+                        >
+                            <div class="flex items-center gap-3 min-w-0">
+                                <img id="add-poster-preview" src="" alt="Poster Preview" class="hidden w-10 aspect-[2/3] object-cover border border-stone-300 flex-shrink-0" />
+                                <div id="add-poster-placeholder" class="w-10 aspect-[2/3] bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-400 flex-shrink-0">
+                                    <i class="fa-regular fa-image text-sm"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p id="add-poster-label" class="text-xs font-semibold text-stone-800 truncate">Drag &amp; drop a poster image here, or click to browse</p>
+                                    <p class="text-[11px] text-stone-500 font-serif">Saves automatically to the shared <code>posters/</code> folder (JPG, PNG, WebP, GIF)</p>
+                                </div>
+                            </div>
+                            <button type="button" id="add-poster-clear" onclick="clearPosterUpload(event, 'add', 'movie-input-poster')" class="hidden px-2.5 py-1 border border-stone-300 text-[10px] font-bold uppercase tracking-wider text-stone-600 hover:text-[#c4122f] hover:border-[#c4122f] flex-shrink-0">
+                                Clear
+                            </button>
+                            <input type="file" id="add-poster-file" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden" />
+                        </div>
+                        <input type="text" id="movie-input-poster" oninput="syncPosterPreview('add', this.value)" placeholder="Or paste image URL / /posters/filename.jpg (optional)" class="mt-2 w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
                     </div>
 
                     <div>
@@ -416,11 +438,23 @@
 
                 <!-- Right Column: Community Reviews Feed (READ, UPDATE, DELETE) -->
                 <div class="lg:col-span-7">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-xs font-bold text-stone-950 uppercase tracking-widest">
-                            Published Reviews
-                        </h3>
-                        <span id="all-reviews-count" class="text-xs font-mono text-stone-500">Loading...</span>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                        <div class="flex items-baseline gap-3">
+                            <h3 class="text-xs font-bold text-stone-950 uppercase tracking-widest">
+                                Published Reviews
+                            </h3>
+                            <span id="all-reviews-count" class="text-xs font-mono text-stone-500">Loading...</span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <label for="reviews-sort-select" class="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Sort by</label>
+                            <select id="reviews-sort-select" onchange="fetchAllReviews()" class="bg-white border border-stone-300 px-2.5 py-1 text-xs font-semibold text-stone-900 focus:outline-none focus:border-stone-900">
+                                <option value="newest">Newest</option>
+                                <option value="film">Film (A–Z)</option>
+                                <option value="director">Director (A–Z)</option>
+                                <option value="rating">Highest Rating</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div id="all-reviews-feed" class="space-y-4">
@@ -431,15 +465,58 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- TAB 3: DIRECTOR LEADERBOARD (AGGREGATION & GROUP BY) -->
+        <!-- TAB 3: FILM LEADERBOARD (AGGREGATION & GROUP BY) -->
+        <!-- ============================================================ -->
+        <section id="section-film-leaderboard" class="tab-section hidden">
+            <div class="pb-6 border-b border-stone-300 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <span class="editorial-kicker">Critical Standings</span>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-stone-950 serif-title mt-1">Film Leaderboard</h2>
+                    <p class="text-stone-600 text-sm mt-1 max-w-2xl font-serif">
+                        All catalogued films ranked by average community score and review count. Click any film to read its critiques.
+                    </p>
+                </div>
+                <button onclick="switchTab('directors')" class="px-3.5 py-1.5 border border-stone-900 bg-white hover:bg-stone-100 text-stone-900 text-xs font-semibold uppercase tracking-wider transition self-start sm:self-auto">
+                    View Director Leaderboard →
+                </button>
+            </div>
+
+            <div class="mt-8 overflow-x-auto editorial-card">
+                <table class="w-full text-left text-sm text-stone-800">
+                    <thead class="bg-stone-50 text-[11px] uppercase tracking-wider text-stone-900 font-bold border-b border-stone-300">
+                        <tr>
+                            <th class="px-5 py-3.5 w-16">Rank</th>
+                            <th class="px-5 py-3.5">Film</th>
+                            <th class="px-5 py-3.5">Director</th>
+                            <th class="px-5 py-3.5">Reviews</th>
+                            <th class="px-5 py-3.5">Range</th>
+                            <th class="px-5 py-3.5">Average Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="films-leaderboard-body" class="divide-y divide-stone-200 bg-white">
+                        <tr>
+                            <td colspan="6" class="px-5 py-6 text-stone-500 font-serif text-center">Loading film leaderboard...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- TAB 4: DIRECTOR LEADERBOARD (AGGREGATION & GROUP BY) -->
         <!-- ============================================================ -->
         <section id="section-directors" class="tab-section hidden">
-            <div class="pb-6 border-b border-stone-300">
-                <span class="editorial-kicker">Critical Standings</span>
-                <h2 class="text-3xl sm:text-4xl font-bold text-stone-950 serif-title mt-1">Director Leaderboard</h2>
-                <p class="text-stone-600 text-sm mt-1 max-w-2xl font-serif">
-                    Ranked by aggregated average rating and review volume across catalogued filmographies.
-                </p>
+            <div class="pb-6 border-b border-stone-300 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <span class="editorial-kicker">Critical Standings</span>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-stone-950 serif-title mt-1">Director Leaderboard</h2>
+                    <p class="text-stone-600 text-sm mt-1 max-w-2xl font-serif">
+                        Ranked by aggregated average rating and review volume across catalogued filmographies.
+                    </p>
+                </div>
+                <button onclick="switchTab('film-leaderboard')" class="px-3.5 py-1.5 border border-stone-900 bg-white hover:bg-stone-100 text-stone-900 text-xs font-semibold uppercase tracking-wider transition self-start sm:self-auto">
+                    View Film Leaderboard →
+                </button>
             </div>
 
             <div class="mt-8 overflow-x-auto editorial-card">
@@ -466,23 +543,34 @@
         <!-- TAB 4: COMPLETIONIST CHALLENGE (RELATIONAL DIVISION) -->
         <!-- ============================================================ -->
         <section id="section-division" class="tab-section hidden">
-            <div class="pb-6 border-b border-stone-300">
-                <span class="editorial-kicker">Filmography Milestone</span>
-                <h2 class="text-3xl sm:text-4xl font-bold text-stone-950 serif-title mt-1">Christopher Nolan Completionist Challenge</h2>
-                <p class="text-stone-600 text-sm mt-1 max-w-3xl font-serif">
-                    Recognizing reviewers who have watched and reviewed every single Christopher Nolan film in the archive.
-                </p>
+            <div class="pb-6 border-b border-stone-300 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <span class="editorial-kicker">Filmography Milestone</span>
+                    <h2 id="division-heading" class="text-3xl sm:text-4xl font-bold text-stone-950 serif-title mt-1">Director Completionist Challenge</h2>
+                    <p id="division-subtitle" class="text-stone-600 text-sm mt-1 max-w-3xl font-serif">
+                        Recognizing all Stans who have watched and reviewed every catalogued work by the selected director.
+                    </p>
+                </div>
+
+                <div class="min-w-[220px]">
+                    <label for="division-director-select" class="block text-[10px] font-bold text-stone-600 uppercase tracking-widest mb-1">
+                        Select Director
+                    </label>
+                    <select id="division-director-select" onchange="fetchDivision(this.value)" class="w-full bg-white border border-stone-900 px-3 py-2 text-xs font-semibold text-stone-900 focus:outline-none focus:border-[#c4122f]">
+                        <option value="1">Loading directors...</option>
+                    </select>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
                 <div class="editorial-card p-6">
                     <div class="flex items-center justify-between mb-4 pb-2 border-b border-stone-200">
-                        <h3 class="text-xs font-bold text-stone-950 uppercase tracking-widest">
-                            Required Nolan Filmography
+                        <h3 id="division-filmography-title" class="text-xs font-bold text-stone-950 uppercase tracking-widest">
+                            Required Filmography
                         </h3>
-                        <span id="nolan-count-badge" class="text-xs text-stone-600 font-mono">5 Films</span>
+                        <span id="division-count-badge" class="text-xs text-stone-600 font-mono">0 Films</span>
                     </div>
-                    <ul id="nolan-movies-list" class="divide-y divide-stone-200"></ul>
+                    <ul id="division-movies-list" class="divide-y divide-stone-200"></ul>
                 </div>
 
                 <div class="editorial-card p-6">
@@ -645,8 +733,27 @@
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Poster Image URL (Optional)</label>
-                    <input type="text" id="edit-movie-poster" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
+                    <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Poster Image (Optional)</label>
+                    <div
+                        id="edit-poster-dropzone"
+                        class="border border-dashed border-stone-400 bg-white p-3.5 flex items-center justify-between gap-4 cursor-pointer hover:border-stone-900 transition"
+                    >
+                        <div class="flex items-center gap-3 min-w-0">
+                            <img id="edit-poster-preview" src="" alt="Poster Preview" class="hidden w-10 aspect-[2/3] object-cover border border-stone-300 flex-shrink-0" />
+                            <div id="edit-poster-placeholder" class="w-10 aspect-[2/3] bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-400 flex-shrink-0">
+                                <i class="fa-regular fa-image text-sm"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p id="edit-poster-label" class="text-xs font-semibold text-stone-800 truncate">Drag &amp; drop a new poster, or click to browse</p>
+                                <p class="text-[11px] text-stone-500 font-serif">Saves to <code>posters/</code> with a portable path</p>
+                            </div>
+                        </div>
+                        <button type="button" id="edit-poster-clear" onclick="clearPosterUpload(event, 'edit', 'edit-movie-poster')" class="hidden px-2.5 py-1 border border-stone-300 text-[10px] font-bold uppercase tracking-wider text-stone-600 hover:text-[#c4122f] hover:border-[#c4122f] flex-shrink-0">
+                            Clear
+                        </button>
+                        <input type="file" id="edit-poster-file" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden" />
+                    </div>
+                    <input type="text" id="edit-movie-poster" oninput="syncPosterPreview('edit', this.value)" placeholder="Or paste image URL / /posters/filename.jpg" class="mt-2 w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
                 </div>
 
                 <div>
@@ -793,6 +900,7 @@
             closeSidebar();
             if (tabId === 'movies') fetchMovies();
             if (tabId === 'reviews') { fetchAllReviews(); fetchUsers(); }
+            if (tabId === 'film-leaderboard') fetchFilmLeaderboard();
             if (tabId === 'directors') fetchDirectors();
             if (tabId === 'division') fetchDivision();
         }
@@ -868,7 +976,7 @@
 
             container.innerHTML = movies.map(m => {
                 const poster = m.poster_url || defaultPoster;
-                const score = m.average_rating > 0 ? parseFloat(m.average_rating).toFixed(1) : '—';
+                const score = m.average_rating !== null ? parseFloat(m.average_rating).toFixed(1) : '—';
                 const primaryGenre = m.genres ? m.genres.split(',')[0] : 'Feature';
 
                 return `
@@ -972,6 +1080,7 @@
                     statusDiv.className = 'p-3 bg-emerald-50 text-emerald-800 block';
                     statusDiv.innerText = 'Success';
                     document.getElementById('add-movie-form').reset();
+                    syncPosterPreview('add', '');
                     await fetchMovies();
                     setTimeout(() => {
                         toggleAddMoviePanel();
@@ -1000,6 +1109,7 @@
             document.getElementById('edit-movie-language').value = movie.language || 'English';
             document.getElementById('edit-movie-prequel').value = movie.prequel_movie_id || '';
             document.getElementById('edit-movie-poster').value = movie.poster_url || '';
+            syncPosterPreview('edit', movie.poster_url || '');
             document.getElementById('edit-movie-synopsis').value = movie.synopsis || '';
             document.getElementById('edit-movie-status').className = 'hidden';
 
@@ -1107,8 +1217,11 @@
         async function fetchAllReviews() {
             const feed = document.getElementById('all-reviews-feed');
             const countEl = document.getElementById('all-reviews-count');
+            const sortSelect = document.getElementById('reviews-sort-select');
+            const sortBy = sortSelect ? sortSelect.value : 'newest';
+
             try {
-                const res = await fetch('/api/reviews');
+                const res = await fetch(`/api/reviews?sort=${encodeURIComponent(sortBy)}`);
                 const data = await res.json();
                 if (data.success) {
                     countEl.innerText = `${data.count} Published Reviews`;
@@ -1130,13 +1243,14 @@
             const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
             const safeText = escapeHtml(r.review_text || '').replace(/\n/g, ' ');
             const movieLabel = showMovieTitle ? escapeHtml(r.movie_title) : (currentModalMovie ? escapeHtml(currentModalMovie.movieTitle) : '');
+            const directorSuffix = r.director_name ? ` <span class="text-stone-400 font-normal">· ${escapeHtml(r.director_name)}</span>` : '';
 
             return `
                 <div class="editorial-card p-4 bg-white">
                     <div class="flex items-start justify-between gap-3">
                         <div>
                             ${showMovieTitle ? `
-                                <span class="editorial-kicker text-[10px]">${escapeHtml(r.movie_title)} (${r.release_year})</span>
+                                <span class="editorial-kicker text-[10px]">${escapeHtml(r.movie_title)} (${r.release_year})${directorSuffix}</span>
                             ` : ''}
                             <div class="flex items-center gap-2 mt-0.5">
                                 <strong class="text-stone-900 text-xs uppercase tracking-wider">${escapeHtml(r.username)}</strong>
@@ -1153,8 +1267,7 @@
                         ${escapeHtml(r.review_text || 'No written critique provided.')}
                     </p>
 
-                    <div class="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between text-[11px]">
-                        <span class="text-stone-400 font-mono">Watched ${new Date(r.watch_date).toLocaleDateString('en-US')}</span>
+                    <div class="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-end text-[11px]">
                         <div class="flex items-center gap-3">
                             <button
                                 onclick="openEditReviewModal(${r.review_id}, '${movieLabel.replace(/'/g, "\\'")}', ${r.rating}, '${safeText.replace(/'/g, "\\'")}', ${r.contains_spoilers ? 'true' : 'false'})"
@@ -1357,8 +1470,49 @@
         }
 
         // ============================================================
-        // ANALYTICS: DIRECTOR LEADERBOARD & COMPLETIONIST CHALLENGE
+        // ANALYTICS: FILM & DIRECTOR LEADERBOARDS & COMPLETIONIST CHALLENGE
         // ============================================================
+        async function fetchFilmLeaderboard() {
+            try {
+                const res = await fetch('/api/leaderboard/films');
+                const data = await res.json();
+                if (data.success) {
+                    const tbody = document.getElementById('films-leaderboard-body');
+                    if (data.data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="px-5 py-6 text-stone-500 font-serif text-center">No films in catalog yet.</td></tr>';
+                        return;
+                    }
+                    tbody.innerHTML = data.data.map((f, idx) => {
+                        const poster = f.poster_url || defaultPoster;
+                        const rangeText = f.min_rating !== null && f.max_rating !== null
+                            ? (f.min_rating === f.max_rating ? `${f.max_rating} ★` : `${f.min_rating} – ${f.max_rating} ★`)
+                            : '—';
+                        const avgText = f.average_rating !== null ? `★ ${parseFloat(f.average_rating).toFixed(2)}` : '—';
+                        return `
+                            <tr onclick="openReviewsModal(${f.movie_id}, '${escapeHtml(f.title).replace(/'/g, "\\'")}', '${escapeHtml(poster)}')" class="hover:bg-stone-50 transition cursor-pointer">
+                                <td class="px-5 py-3.5 font-mono text-xs font-bold text-stone-500">#${idx + 1}</td>
+                                <td class="px-5 py-3.5">
+                                    <div class="flex items-center gap-3">
+                                        <img src="${escapeHtml(poster)}" onerror="this.onerror=null; this.src='${defaultPoster}';" class="w-8 aspect-[2/3] object-cover border border-stone-200 flex-shrink-0" />
+                                        <div>
+                                            <div class="font-bold text-stone-950 serif-title text-base leading-tight">${escapeHtml(f.title)}</div>
+                                            <div class="text-[11px] font-mono text-stone-400">${f.release_year}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-3.5 text-stone-700 text-xs font-serif">${escapeHtml(f.director_name || 'Unknown')}</td>
+                                <td class="px-5 py-3.5 font-mono text-xs">${f.total_reviews}</td>
+                                <td class="px-5 py-3.5 font-mono text-xs text-stone-600">${rangeText}</td>
+                                <td class="px-5 py-3.5 font-serif font-bold text-[#c4122f] text-sm">${avgText}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error('Failed to load film leaderboard:', err);
+            }
+        }
+
         async function fetchDirectors() {
             try {
                 const res = await fetch('/api/directors');
@@ -1370,22 +1524,41 @@
                             <td class="px-5 py-3.5 text-stone-600 text-xs font-serif">${escapeHtml(d.nationality)}</td>
                             <td class="px-5 py-3.5 font-mono text-xs">${d.total_films_directed}</td>
                             <td class="px-5 py-3.5 font-mono text-xs">${d.total_reviews}</td>
-                            <td class="px-5 py-3.5 font-serif font-bold text-[#c4122f] text-sm">★ ${d.average_rating}</td>
+                            <td class="px-5 py-3.5 font-serif font-bold text-[#c4122f] text-sm">★ ${d.average_rating !== null ? parseFloat(d.average_rating).toFixed(2) : '—'}</td>
                         </tr>
                     `).join('');
+
+                    const dirSelect = document.getElementById('division-director-select');
+                    if (dirSelect && data.data.length > 0) {
+                        const prevVal = dirSelect.value;
+                        dirSelect.innerHTML = data.data.map(d =>
+                            `<option value="${d.director_id}">${escapeHtml(d.director_name)} (${d.total_films_directed} ${d.total_films_directed === 1 ? 'film' : 'films'})</option>`
+                        ).join('');
+                        const hasPrev = data.data.some(d => String(d.director_id) === String(prevVal));
+                        dirSelect.value = hasPrev ? prevVal : String(data.data[0].director_id);
+                    }
                 }
             } catch (err) {
                 console.error('Failed to load directors:', err);
             }
         }
 
-        async function fetchDivision() {
+        async function fetchDivision(explicitDirectorId = null) {
             try {
-                const res = await fetch('/api/division/nolan');
+                const dirSelect = document.getElementById('division-director-select');
+                if (dirSelect && dirSelect.options.length <= 1 && dirSelect.options[0]?.text.includes('Loading')) {
+                    await fetchDirectors();
+                }
+                const selectedId = explicitDirectorId || (dirSelect ? dirSelect.value : '1') || '1';
+                const res = await fetch(`/api/division?directorId=${encodeURIComponent(selectedId)}`);
                 const data = await res.json();
                 if (data.success) {
-                    document.getElementById('nolan-count-badge').innerText = `${data.total_nolan_movies} Films Required`;
-                    document.getElementById('nolan-movies-list').innerHTML = data.nolan_movies.map(m => `
+                    document.getElementById('division-heading').innerText = `${data.director_name} Completionist Challenge`;
+                    document.getElementById('division-subtitle').innerText = `Recognizing all Stans who have watched and reviewed every catalogued work by ${data.director_name}.`;
+                    document.getElementById('division-filmography-title').innerText = `Required ${data.director_name} Filmography`;
+                    document.getElementById('division-count-badge').innerText = `${data.total_movies} ${data.total_movies === 1 ? 'Film' : 'Films'} Required`;
+
+                    document.getElementById('division-movies-list').innerHTML = data.movies.map(m => `
                         <li class="py-2.5 flex items-center justify-between text-xs">
                             <div class="flex items-center gap-3">
                                 <img src="${escapeHtml(m.poster_url || defaultPoster)}" onerror="this.onerror=null; this.src='${defaultPoster}';" class="w-7 aspect-[2/3] object-cover border border-stone-200" />
@@ -1397,7 +1570,7 @@
 
                     const winnersEl = document.getElementById('division-winners-container');
                     if (data.division_winners.length === 0) {
-                        winnersEl.innerHTML = '<div class="py-6 text-xs text-stone-500 font-serif text-center">No reviewer has completed all Nolan films yet.</div>';
+                        winnersEl.innerHTML = `<div class="py-6 text-xs text-stone-500 font-serif text-center">No reviewer has completed all ${escapeHtml(data.director_name)} films yet.</div>`;
                     } else {
                         winnersEl.innerHTML = data.division_winners.map(w => `
                             <div class="py-3.5 flex items-center justify-between">
@@ -1408,7 +1581,7 @@
                                     </p>
                                 </div>
                                 <span class="text-xs font-bold text-[#c4122f] uppercase tracking-wider">
-                                    ✓ ${data.total_nolan_movies}/${data.total_nolan_movies}
+                                    ✓ ${data.total_movies}/${data.total_movies}
                                 </span>
                             </div>
                         `).join('');
@@ -1419,7 +1592,117 @@
             }
         }
 
+        // ============================================================
+        // POSTER IMAGE DRAG & DROP UPLOAD (Cross-Platform)
+        // ============================================================
+        function syncPosterPreview(prefix, url) {
+            const preview = document.getElementById(`${prefix}-poster-preview`);
+            const placeholder = document.getElementById(`${prefix}-poster-placeholder`);
+            const label = document.getElementById(`${prefix}-poster-label`);
+            const clearBtn = document.getElementById(`${prefix}-poster-clear`);
+            const trimmed = (url || '').trim();
+
+            if (trimmed) {
+                preview.src = trimmed;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                clearBtn.classList.remove('hidden');
+                label.innerText = trimmed;
+            } else {
+                preview.src = '';
+                preview.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+                clearBtn.classList.add('hidden');
+                label.innerText = prefix === 'add'
+                    ? 'Drag & drop a poster image here, or click to browse'
+                    : 'Drag & drop a new poster, or click to browse';
+            }
+        }
+
+        function clearPosterUpload(event, prefix, inputId) {
+            event.stopPropagation();
+            const input = document.getElementById(inputId);
+            const fileInput = document.getElementById(`${prefix}-poster-file`);
+            if (input) input.value = '';
+            if (fileInput) fileInput.value = '';
+            syncPosterPreview(prefix, '');
+        }
+
+        async function uploadPosterFile(file, prefix, inputId) {
+            const label = document.getElementById(`${prefix}-poster-label`);
+            if (!file || !file.type.startsWith('image/')) {
+                label.innerText = 'Please drop a valid image (JPG, PNG, WebP, or GIF).';
+                return;
+            }
+            if (file.size > 7 * 1024 * 1024) {
+                label.innerText = 'Image is too large (max 7 MB).';
+                return;
+            }
+
+            label.innerText = `Uploading ${file.name}...`;
+            const reader = new FileReader();
+            reader.onload = async () => {
+                try {
+                    const res = await fetch('/api/posters/upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ filename: file.name, dataUrl: reader.result })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        document.getElementById(inputId).value = data.poster_url;
+                        syncPosterPreview(prefix, data.poster_url);
+                    } else {
+                        label.innerText = 'Upload failed: ' + data.error;
+                    }
+                } catch (err) {
+                    label.innerText = 'Upload failed: ' + err.message;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function setupPosterDropzone(prefix, inputId) {
+            const zone = document.getElementById(`${prefix}-poster-dropzone`);
+            const fileInput = document.getElementById(`${prefix}-poster-file`);
+            if (!zone || !fileInput) return;
+
+            zone.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files && fileInput.files[0]) {
+                    uploadPosterFile(fileInput.files[0], prefix, inputId);
+                }
+            });
+
+            ['dragenter', 'dragover'].forEach(evtName => {
+                zone.addEventListener(evtName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    zone.classList.add('border-[#c4122f]', 'bg-rose-50/40');
+                    zone.classList.remove('border-stone-400', 'bg-white');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(evtName => {
+                zone.addEventListener(evtName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    zone.classList.remove('border-[#c4122f]', 'bg-rose-50/40');
+                    zone.classList.add('border-stone-400', 'bg-white');
+                });
+            });
+
+            zone.addEventListener('drop', (e) => {
+                const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+                if (file) {
+                    uploadPosterFile(file, prefix, inputId);
+                }
+            });
+        }
+
         // Initial Load
+        setupPosterDropzone('add', 'movie-input-poster');
+        setupPosterDropzone('edit', 'edit-movie-poster');
         fetchMovies();
         fetchUsers();
     </script>
