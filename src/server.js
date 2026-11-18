@@ -602,9 +602,39 @@ app.post('/api/users', async (req, res) => {
 // 4. ANALYTICS — LEADERBOARDS & RELATIONAL DIVISION
 // ====================================================================
 
-// Film Leaderboard (LEFT OUTER JOIN + COUNT/MIN/MAX/AVG + GROUP BY)
+// Film Leaderboard (Derived Tables in FROM for Critics vs Cinephiles + >= ALL + HAVING subquery)
+// Supports ?filter=all|top|above_avg|critics_choice
 app.get('/api/leaderboard/films', async (req, res) => {
+    const filter = req.query.filter || 'all';
+
+    let whereClause = '';
+    let havingClause = '';
+    if (filter === 'top') {
+        havingClause = `
+            HAVING COUNT(R.review_id) > 0
+               AND AVG(R.rating) >= ALL (
+                   SELECT AVG(R3.rating)
+                   FROM reviews R3
+                   GROUP BY R3.movie_id
+               )
+        `;
+    } else if (filter === 'above_avg') {
+        havingClause = `
+            HAVING AVG(R.rating) > (
+                SELECT AVG(R3.rating)
+                FROM reviews R3
+            )
+        `;
+    } else if (filter === 'critics_choice') {
+        whereClause = `
+            WHERE C.critic_avg IS NOT NULL
+              AND P.cinephile_avg IS NOT NULL
+              AND C.critic_avg > P.cinephile_avg
+        `;
+    }
+
     try {
+        const [[stats]] = await pool.query(`SELECT AVG(rating) AS platform_average FROM reviews;`);
         const [rows] = await pool.query(`
             SELECT 
                 M.movie_id,
@@ -615,14 +645,39 @@ app.get('/api/leaderboard/films', async (req, res) => {
                 COUNT(R.review_id) AS total_reviews,
                 MIN(R.rating) AS min_rating,
                 MAX(R.rating) AS max_rating,
-                AVG(R.rating) AS average_rating
+                AVG(R.rating) AS average_rating,
+                C.critic_avg,
+                P.cinephile_avg
             FROM movies M
             LEFT OUTER JOIN directors D ON M.director_id = D.director_id
             LEFT OUTER JOIN reviews R ON M.movie_id = R.movie_id
-            GROUP BY M.movie_id, M.title, M.release_year, M.poster_url, D.name
+            LEFT OUTER JOIN (
+                SELECT R1.movie_id, AVG(R1.rating) AS critic_avg
+                FROM reviews R1
+                JOIN users U1 ON R1.user_id = U1.user_id
+                WHERE U1.role = 'CRITIC'
+                GROUP BY R1.movie_id
+            ) AS C ON M.movie_id = C.movie_id
+            LEFT OUTER JOIN (
+                SELECT R2.movie_id, AVG(R2.rating) AS cinephile_avg
+                FROM reviews R2
+                JOIN users U2 ON R2.user_id = U2.user_id
+                WHERE U2.role = 'CINEPHILE'
+                GROUP BY R2.movie_id
+            ) AS P ON M.movie_id = P.movie_id
+            ${whereClause}
+            GROUP BY
+                M.movie_id, M.title, M.release_year, M.poster_url, D.name,
+                C.critic_avg, P.cinephile_avg
+            ${havingClause}
             ORDER BY average_rating DESC, total_reviews DESC, M.title ASC;
         `);
-        res.json({ success: true, data: rows });
+        res.json({
+            success: true,
+            filter,
+            platform_average: stats ? stats.platform_average : null,
+            data: rows
+        });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }

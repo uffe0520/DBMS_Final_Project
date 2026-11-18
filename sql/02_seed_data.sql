@@ -62,19 +62,19 @@ INSERT INTO `movie_genres` (`movie_id`, `genre_name`) VALUES
 (12, 'Crime'),     (12, 'Drama');
 
 -- --------------------------------------------------------------------
--- 5. Seed Reviews (0-5 Discrete Star Scale)
+-- 5. Seed Reviews (0-5 Discrete Star Scale — 22 Reviews)
 -- Completionists: alex_chen (Nolan 5/5), clara_oswald (Miyazaki 2/2),
 --                 david_kim (Villeneuve 2/2)
 -- --------------------------------------------------------------------
 INSERT INTO `reviews` (`review_id`, `user_id`, `movie_id`, `rating`, `review_text`, `contains_spoilers`) VALUES
-(1,  1, 1,  5, 'A reverse-chronological masterclass in unreliable narration.',                              FALSE),
+(1,  1, 1,  4, 'A reverse-chronological puzzle in unreliable narration that rewards close attention.',       FALSE),
 (2,  1, 2,  5, 'Unrivaled tension and Heath Ledger''s unforgettable performance.',                        FALSE),
 (3,  1, 3,  4, 'Stunning dream-heist architecture with Zimmer''s iconic score.',                          FALSE),
-(4,  1, 4,  5, 'Visually overwhelming and deeply emotional sci-fi.',                                      TRUE),
-(5,  1, 5,  5, 'Relentless three-hour biographical thriller shot in 70mm IMAX.',                            FALSE),
+(4,  1, 4,  4, 'Visually overwhelming and deeply emotional sci-fi.',                                      TRUE),
+(5,  1, 5,  4, 'Relentless three-hour biographical thriller shot in 70mm IMAX.',                            FALSE),
 (6,  2, 2,  5, 'Still the gold standard for superhero cinema.',                                           FALSE),
 (7,  2, 3,  4, 'Complex narrative layers that reward every rewatch.',                                     FALSE),
-(8,  2, 8,  5, 'Pure animated magic; every single frame belongs in a gallery.',                           FALSE),
+(8,  2, 8,  4, 'Pure animated magic; every single frame belongs in a gallery.',                           FALSE),
 (9,  2, 7,  5, 'Dune: Part Two was breathtaking in IMAX. Peak sci-fi filmmaking.',                        FALSE),
 (10, 3, 5,  5, 'Nolan''s most mature technical achievement; Cillian Murphy is phenomenal.',               FALSE),
 (11, 3, 7,  5, 'Science fiction on a grand, operatic scale.',                                             FALSE),
@@ -84,4 +84,8 @@ INSERT INTO `reviews` (`review_id`, `user_id`, `movie_id`, `rating`, `review_tex
 (15, 5, 6,  4, 'Slow-burn world building with jaw-dropping desert cinematography.',                       FALSE),
 (16, 5, 7,  5, 'Desert warfare and soundscapes are mindblowing. Best theater experience of 2024.',        FALSE),
 (17, 6, 11, 4, 'Sharp, rhythmic dialogue that redefined 1990s independent cinema.',                       FALSE),
-(18, 3, 12, 5, 'A dark, hypnotic portrait of urban alienation and obsession.',                            FALSE);
+(18, 3, 12, 5, 'A dark, hypnotic portrait of urban alienation and obsession.',                            FALSE),
+(19, 3, 3,  3, 'Dazzling mechanical concept, though its exposition occasionally outweighs emotion.',      FALSE),
+(20, 6, 10, 4, 'Razor-sharp tonal shifts and unforgettable production design.',                           TRUE),
+(21, 5, 11, 3, 'Iconic scenes and soundtrack, even if the pacing meanders in the middle act.',            FALSE),
+(22, 6, 12, 3, 'Bleak, atmospheric 1970s character study that deliberately resists easy sympathy.',       FALSE);

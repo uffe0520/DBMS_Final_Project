@@ -88,8 +88,10 @@ ORDER BY R.review_id DESC;
 -- DELETE FROM movies WHERE movie_id = ?;
 
 -- --------------------------------------------------------------------
--- QUERY 3A: Film Leaderboard (LEFT OUTER JOIN + COUNT / MIN / MAX / AVG)
--- Purpose: Ranks every catalogued film by average score and review volume.
+-- QUERY 3A: Film Leaderboard — Derived Tables in FROM (Critics vs. Cinephiles)
+-- Purpose: Ranks every catalogued film by overall average score while
+--          comparing accredited Critic vs. Cinephile averages via two
+--          derived tables in the FROM clause (zero CTEs / CASE WHEN).
 -- --------------------------------------------------------------------
 SELECT 
     M.title,
@@ -98,12 +100,85 @@ SELECT
     COUNT(R.review_id) AS total_reviews,
     MIN(R.rating) AS min_rating,
     MAX(R.rating) AS max_rating,
-    AVG(R.rating) AS average_rating
+    AVG(R.rating) AS average_rating,
+    C.critic_avg,
+    P.cinephile_avg
 FROM movies M
 LEFT OUTER JOIN directors D ON M.director_id = D.director_id
 LEFT OUTER JOIN reviews R ON M.movie_id = R.movie_id
-GROUP BY M.movie_id, M.title, M.release_year, D.name
+LEFT OUTER JOIN (
+    SELECT R1.movie_id, AVG(R1.rating) AS critic_avg
+    FROM reviews R1
+    JOIN users U1 ON R1.user_id = U1.user_id
+    WHERE U1.role = 'CRITIC'
+    GROUP BY R1.movie_id
+) AS C ON M.movie_id = C.movie_id
+LEFT OUTER JOIN (
+    SELECT R2.movie_id, AVG(R2.rating) AS cinephile_avg
+    FROM reviews R2
+    JOIN users U2 ON R2.user_id = U2.user_id
+    WHERE U2.role = 'CINEPHILE'
+    GROUP BY R2.movie_id
+) AS P ON M.movie_id = P.movie_id
+GROUP BY
+    M.movie_id, M.title, M.release_year, D.name,
+    C.critic_avg, P.cinephile_avg
 ORDER BY average_rating DESC, total_reviews DESC, M.title ASC;
+
+-- Query 3A-ii: Highest-Rated Films (Tie-Safe Extremal Comparison using >= ALL, no LIMIT)
+SELECT
+    M.title,
+    M.release_year,
+    COUNT(R.review_id) AS total_reviews,
+    AVG(R.rating) AS average_rating
+FROM movies M
+JOIN reviews R ON M.movie_id = R.movie_id
+GROUP BY M.movie_id, M.title, M.release_year
+HAVING COUNT(R.review_id) > 0
+   AND AVG(R.rating) >= ALL (
+       SELECT AVG(R2.rating)
+       FROM reviews R2
+       GROUP BY R2.movie_id
+   )
+ORDER BY total_reviews DESC, M.title ASC;
+
+-- Query 3A-iii: Films Rated Above the Overall Platform Average (Subquery in HAVING)
+SELECT
+    M.title,
+    M.release_year,
+    COUNT(R.review_id) AS total_reviews,
+    AVG(R.rating) AS average_rating
+FROM movies M
+JOIN reviews R ON M.movie_id = R.movie_id
+GROUP BY M.movie_id, M.title, M.release_year
+HAVING AVG(R.rating) > (
+    SELECT AVG(R2.rating)
+    FROM reviews R2
+)
+ORDER BY average_rating DESC, total_reviews DESC, M.title ASC;
+
+-- Query 3A-iv: Critics' Choice — Films Rated Higher by Critics than Cinephiles
+SELECT
+    M.title,
+    C.critic_avg,
+    P.cinephile_avg
+FROM movies M
+JOIN (
+    SELECT R1.movie_id, AVG(R1.rating) AS critic_avg
+    FROM reviews R1
+    JOIN users U1 ON R1.user_id = U1.user_id
+    WHERE U1.role = 'CRITIC'
+    GROUP BY R1.movie_id
+) AS C ON M.movie_id = C.movie_id
+JOIN (
+    SELECT R2.movie_id, AVG(R2.rating) AS cinephile_avg
+    FROM reviews R2
+    JOIN users U2 ON R2.user_id = U2.user_id
+    WHERE U2.role = 'CINEPHILE'
+    GROUP BY R2.movie_id
+) AS P ON M.movie_id = P.movie_id
+WHERE C.critic_avg > P.cinephile_avg
+ORDER BY C.critic_avg DESC, M.title ASC;
 
 -- --------------------------------------------------------------------
 -- QUERY 3B: Director Leaderboard (JOIN + LEFT OUTER JOIN + GROUP BY)
@@ -146,3 +221,5 @@ WHERE NOT EXISTS (
             AND R.movie_id = M.movie_id
       )
 );
+
+

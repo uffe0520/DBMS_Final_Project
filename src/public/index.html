@@ -205,9 +205,9 @@
         </nav>
 
         <div class="p-5 border-t border-stone-200 bg-stone-50 text-[11px] text-stone-500 leading-relaxed font-serif">
-            <strong class="text-stone-900 block font-sans text-xs uppercase mb-1">Core Relational Archive</strong>
-            Full Create, Read, Update, and Delete operations backed by 5 normalized MySQL tables.
+            <strong class="text-stone-900 block font-sans text-xs uppercase mb-1">
         </div>
+        
     </aside>
 
     <!-- Main Content -->
@@ -465,7 +465,7 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- TAB 3: FILM LEADERBOARD (AGGREGATION & GROUP BY) -->
+        <!-- TAB 3: FILM LEADERBOARD (DERIVED TABLES, >= ALL, HAVING) -->
         <!-- ============================================================ -->
         <section id="section-film-leaderboard" class="tab-section hidden">
             <div class="pb-6 border-b border-stone-300 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -473,7 +473,7 @@
                     <span class="editorial-kicker">Critical Standings</span>
                     <h2 class="text-3xl sm:text-4xl font-bold text-stone-950 serif-title mt-1">Film Leaderboard</h2>
                     <p class="text-stone-600 text-sm mt-1 max-w-2xl font-serif">
-                        All catalogued films ranked by average community score and review count. Click any film to read its critiques.
+                        Catalogued films ranked by overall score, comparing Accredited Critics against Cinephiles. Click any film to read its critiques.
                     </p>
                 </div>
                 <button onclick="switchTab('directors')" class="px-3.5 py-1.5 border border-stone-900 bg-white hover:bg-stone-100 text-stone-900 text-xs font-semibold uppercase tracking-wider transition self-start sm:self-auto">
@@ -481,7 +481,30 @@
                 </button>
             </div>
 
-            <div class="mt-8 overflow-x-auto editorial-card">
+            <!-- Filter Bar -->
+            <div class="mt-6 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Leaderboard filters">
+                    <button type="button" onclick="setFilmLeaderboardFilter('all')" id="lb-filter-all"
+                        class="lb-filter-btn px-3.5 py-2 border text-xs font-semibold uppercase tracking-wider transition bg-stone-950 text-white border-stone-950">
+                        All Films
+                    </button>
+                    <button type="button" onclick="setFilmLeaderboardFilter('top')" id="lb-filter-top"
+                        class="lb-filter-btn px-3.5 py-2 border text-xs font-semibold uppercase tracking-wider transition bg-white text-stone-700 border-stone-300 hover:border-stone-900 hover:text-stone-950">
+                        Top-Rated
+                    </button>
+                    <button type="button" onclick="setFilmLeaderboardFilter('above_avg')" id="lb-filter-above_avg"
+                        class="lb-filter-btn px-3.5 py-2 border text-xs font-semibold uppercase tracking-wider transition bg-white text-stone-700 border-stone-300 hover:border-stone-900 hover:text-stone-950">
+                        Above Platform Avg
+                    </button>
+                    <button type="button" onclick="setFilmLeaderboardFilter('critics_choice')" id="lb-filter-critics_choice"
+                        class="lb-filter-btn px-3.5 py-2 border text-xs font-semibold uppercase tracking-wider transition bg-white text-stone-700 border-stone-300 hover:border-stone-900 hover:text-stone-950">
+                        Critics' Choice
+                    </button>
+                </div>
+                <div id="leaderboard-meta" class="text-xs font-mono text-stone-500 uppercase tracking-wider"></div>
+            </div>
+
+            <div class="mt-4 overflow-x-auto editorial-card">
                 <table class="w-full text-left text-sm text-stone-800">
                     <thead class="bg-stone-50 text-[11px] uppercase tracking-wider text-stone-900 font-bold border-b border-stone-300">
                         <tr>
@@ -490,12 +513,14 @@
                             <th class="px-5 py-3.5">Director</th>
                             <th class="px-5 py-3.5">Reviews</th>
                             <th class="px-5 py-3.5">Range</th>
-                            <th class="px-5 py-3.5">Average Score</th>
+                            <th class="px-5 py-3.5">Critics</th>
+                            <th class="px-5 py-3.5">Cinephiles</th>
+                            <th class="px-5 py-3.5">Overall Avg</th>
                         </tr>
                     </thead>
                     <tbody id="films-leaderboard-body" class="divide-y divide-stone-200 bg-white">
                         <tr>
-                            <td colspan="6" class="px-5 py-6 text-stone-500 font-serif text-center">Loading film leaderboard...</td>
+                            <td colspan="8" class="px-5 py-6 text-stone-500 font-serif text-center">Loading film leaderboard...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1472,14 +1497,37 @@
         // ============================================================
         // ANALYTICS: FILM & DIRECTOR LEADERBOARDS & COMPLETIONIST CHALLENGE
         // ============================================================
+        let currentLeaderboardFilter = 'all';
+
+        function setFilmLeaderboardFilter(filterKey) {
+            currentLeaderboardFilter = filterKey;
+            document.querySelectorAll('.lb-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-stone-950', 'text-white', 'border-stone-950');
+                btn.classList.add('bg-white', 'text-stone-700', 'border-stone-300', 'hover:border-stone-900', 'hover:text-stone-950');
+            });
+            const activeBtn = document.getElementById(`lb-filter-${filterKey}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-white', 'text-stone-700', 'border-stone-300', 'hover:border-stone-900', 'hover:text-stone-950');
+                activeBtn.classList.add('bg-stone-950', 'text-white', 'border-stone-950');
+            }
+            fetchFilmLeaderboard();
+        }
+
         async function fetchFilmLeaderboard() {
             try {
-                const res = await fetch('/api/leaderboard/films');
+                const res = await fetch(`/api/leaderboard/films?filter=${encodeURIComponent(currentLeaderboardFilter)}`);
                 const data = await res.json();
                 if (data.success) {
+                    const metaEl = document.getElementById('leaderboard-meta');
+                    if (metaEl) {
+                        const platAvg = data.platform_average !== null ? `★ ${parseFloat(data.platform_average).toFixed(2)}` : '—';
+                        const countLabel = `${data.data.length} ${data.data.length === 1 ? 'Film' : 'Films'}`;
+                        metaEl.textContent = `Platform Avg: ${platAvg} · ${countLabel}`;
+                    }
+
                     const tbody = document.getElementById('films-leaderboard-body');
                     if (data.data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="6" class="px-5 py-6 text-stone-500 font-serif text-center">No films in catalog yet.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="8" class="px-5 py-6 text-stone-500 font-serif text-center">No films match this leaderboard filter yet.</td></tr>';
                         return;
                     }
                     tbody.innerHTML = data.data.map((f, idx) => {
@@ -1487,6 +1535,8 @@
                         const rangeText = f.min_rating !== null && f.max_rating !== null
                             ? (f.min_rating === f.max_rating ? `${f.max_rating} ★` : `${f.min_rating} – ${f.max_rating} ★`)
                             : '—';
+                        const criticText = f.critic_avg !== null ? `★ ${parseFloat(f.critic_avg).toFixed(2)}` : '—';
+                        const cinephileText = f.cinephile_avg !== null ? `★ ${parseFloat(f.cinephile_avg).toFixed(2)}` : '—';
                         const avgText = f.average_rating !== null ? `★ ${parseFloat(f.average_rating).toFixed(2)}` : '—';
                         return `
                             <tr onclick="openReviewsModal(${f.movie_id}, '${escapeHtml(f.title).replace(/'/g, "\\'")}', '${escapeHtml(poster)}')" class="hover:bg-stone-50 transition cursor-pointer">
@@ -1503,6 +1553,8 @@
                                 <td class="px-5 py-3.5 text-stone-700 text-xs font-serif">${escapeHtml(f.director_name || 'Unknown')}</td>
                                 <td class="px-5 py-3.5 font-mono text-xs">${f.total_reviews}</td>
                                 <td class="px-5 py-3.5 font-mono text-xs text-stone-600">${rangeText}</td>
+                                <td class="px-5 py-3.5 font-mono text-xs text-stone-800">${criticText}</td>
+                                <td class="px-5 py-3.5 font-mono text-xs text-stone-600">${cinephileText}</td>
                                 <td class="px-5 py-3.5 font-serif font-bold text-[#c4122f] text-sm">${avgText}</td>
                             </tr>
                         `;

@@ -14,7 +14,7 @@
 
 ## 2. Database Setup & Initial Data
 
-Run the two SQL scripts in order to create the `filmcraft` database, all 5 tables, and the initial dataset (6 users, 6 directors, 12 films with posters, genres, and 18 reviews):
+Run the two SQL scripts in order to create the `filmcraft` database, all 5 tables, and the initial dataset (6 users, 6 directors, 12 films with posters, genres, and 22 reviews):
 
 ```bash
 mysql -u root < sql/01_schema.sql
@@ -107,7 +107,7 @@ Open **[http://localhost:3001](http://localhost:3001)** in your browser.
   - **Read & Sort:** Inspect reviews per film or across the full community feed sorted by **Newest**, **Film (A–Z)**, **Director (A–Z)**, or **Highest Rating** (`GET /api/reviews?sort=`).
   - **Update:** Edit any review's star rating, commentary, or spoiler tag (`PUT /api/reviews/:id`).
   - **Delete:** Delete any review with live average-rating recalculation (`DELETE /api/reviews/:id`).
-- **Film Leaderboard (`Tab 3`):** Ranks every film by average rating, min–max range, and review volume (`GET /api/leaderboard/films`).
+- **Film Leaderboard (`Tab 3`):** Ranks films by overall average, min–max range, and Critic vs. Cinephile breakdown via derived tables in `FROM`, with filters for **Top-Rated (`>= ALL`)**, **Above Platform Avg (`HAVING` subquery)**, and **Critics' Choice** (`GET /api/leaderboard/films?filter=`).
 - **Director Leaderboard (`Tab 4`):** Multi-table `JOIN` + `GROUP BY` + `HAVING` director ranking (`GET /api/directors`).
 - **Completionist Challenge (`Tab 5`):** Relational Division finding reviewers who completed every catalogued film by any selected director (`GET /api/division?directorId=`).
 
@@ -123,7 +123,7 @@ DBMS_Final_Project/
 ├── sql/
 │   ├── 00_reset_db.sql       # Optional full database drop/recreate
 │   ├── 01_schema.sql         # 5-table BCNF schema definition
-│   ├── 02_seed_data.sql      # Initial dataset (6 users, 6 directors, 12 films, 18 reviews)
+│   ├── 02_seed_data.sql      # Initial dataset (6 users, 6 directors, 12 films, 22 reviews)
 │   └── 03_queries.sql        # Key standard SQL statements for presentation reference
 └── src/
     ├── server.js             # Express REST API + MySQL connection pool
