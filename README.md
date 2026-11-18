@@ -14,7 +14,7 @@
 
 ## 2. Database Setup & Initial Data
 
-Run the two SQL scripts in order to create the `filmcraft` database, all 5 tables, and the initial dataset (6 users, 6 directors, 12 films with posters, genres, and 22 reviews):
+Run the two SQL scripts in order to create the `filmcraft` database, all 5 tables, and the initial dataset (6 users, 6 directors, 12 films with posters, genres, and 36 reviews):
 
 ```bash
 mysql -u root < sql/01_schema.sql
@@ -123,7 +123,7 @@ DBMS_Final_Project/
 ├── sql/
 │   ├── 00_reset_db.sql       # Optional full database drop/recreate
 │   ├── 01_schema.sql         # 5-table BCNF schema definition
-│   ├── 02_seed_data.sql      # Initial dataset (6 users, 6 directors, 12 films, 22 reviews)
+│   ├── 02_seed_data.sql      # Initial dataset (6 users, 6 directors, 12 films, 36 reviews)
 │   └── 03_queries.sql        # Key standard SQL statements for presentation reference
 └── src/
     ├── server.js             # Express REST API + MySQL connection pool

@@ -62,30 +62,68 @@ INSERT INTO `movie_genres` (`movie_id`, `genre_name`) VALUES
 (12, 'Crime'),     (12, 'Drama');
 
 -- --------------------------------------------------------------------
--- 5. Seed Reviews (0-5 Discrete Star Scale — 22 Reviews)
+-- 5. Seed Reviews (0-5 Discrete Star Scale — 36 Reviews, 3 per Film)
+-- Every film has both Accredited Critic and Cinephile coverage.
 -- Completionists: alex_chen (Nolan 5/5), clara_oswald (Miyazaki 2/2),
 --                 david_kim (Villeneuve 2/2)
 -- --------------------------------------------------------------------
 INSERT INTO `reviews` (`review_id`, `user_id`, `movie_id`, `rating`, `review_text`, `contains_spoilers`) VALUES
-(1,  1, 1,  4, 'A reverse-chronological puzzle in unreliable narration that rewards close attention.',       FALSE),
-(2,  1, 2,  5, 'Unrivaled tension and Heath Ledger''s unforgettable performance.',                        FALSE),
-(3,  1, 3,  4, 'Stunning dream-heist architecture with Zimmer''s iconic score.',                          FALSE),
-(4,  1, 4,  4, 'Visually overwhelming and deeply emotional sci-fi.',                                      TRUE),
-(5,  1, 5,  4, 'Relentless three-hour biographical thriller shot in 70mm IMAX.',                            FALSE),
-(6,  2, 2,  5, 'Still the gold standard for superhero cinema.',                                           FALSE),
-(7,  2, 3,  4, 'Complex narrative layers that reward every rewatch.',                                     FALSE),
-(8,  2, 8,  4, 'Pure animated magic; every single frame belongs in a gallery.',                           FALSE),
-(9,  2, 7,  5, 'Dune: Part Two was breathtaking in IMAX. Peak sci-fi filmmaking.',                        FALSE),
-(10, 3, 5,  5, 'Nolan''s most mature technical achievement; Cillian Murphy is phenomenal.',               FALSE),
-(11, 3, 7,  5, 'Science fiction on a grand, operatic scale.',                                             FALSE),
-(12, 3, 10, 5, 'Bong Joon-ho dissects class warfare with surgical precision.',                             TRUE),
-(13, 4, 8,  5, 'Miyazaki crafts a timeless allegory of identity and consumerism.',                        FALSE),
-(14, 4, 9,  4, 'An ambitious ecological epic without simple heroes or villains.',                         FALSE),
-(15, 5, 6,  4, 'Slow-burn world building with jaw-dropping desert cinematography.',                       FALSE),
-(16, 5, 7,  5, 'Desert warfare and soundscapes are mindblowing. Best theater experience of 2024.',        FALSE),
-(17, 6, 11, 4, 'Sharp, rhythmic dialogue that redefined 1990s independent cinema.',                       FALSE),
-(18, 3, 12, 5, 'A dark, hypnotic portrait of urban alienation and obsession.',                            FALSE),
-(19, 3, 3,  3, 'Dazzling mechanical concept, though its exposition occasionally outweighs emotion.',      FALSE),
-(20, 6, 10, 4, 'Razor-sharp tonal shifts and unforgettable production design.',                           TRUE),
-(21, 5, 11, 3, 'Iconic scenes and soundtrack, even if the pacing meanders in the middle act.',            FALSE),
-(22, 6, 12, 3, 'Bleak, atmospheric 1970s character study that deliberately resists easy sympathy.',       FALSE);
+-- Movie 1: Memento (Christopher Nolan)
+(1,  1, 1,  4, 'A reverse-chronological puzzle in unreliable narration that rewards close attention.',          FALSE),
+(2,  6, 1,  4, 'Clever structural editing that keeps the mystery taut right until the final polaroid.',        TRUE),
+(3,  4, 1,  5, 'A landmark neo-noir exercise in memory, self-deception, and subjective cinema.',               FALSE),
+
+-- Movie 2: The Dark Knight (Christopher Nolan)
+(4,  1, 2,  5, 'Unrivaled tension and Heath Ledger''s unforgettable performance.',                           FALSE),
+(5,  2, 2,  5, 'Still the gold standard for superhero cinema and practical IMAX action.',                    FALSE),
+(6,  3, 2,  5, 'Elevates the comic-book blockbuster into an operatic urban crime tragedy.',                  FALSE),
+
+-- Movie 3: Inception (Christopher Nolan)
+(7,  1, 3,  4, 'Stunning dream-heist architecture with Zimmer''s iconic brass score.',                       FALSE),
+(8,  2, 3,  5, 'Complex narrative layers and rotating hallway choreography that reward every rewatch.',      FALSE),
+(9,  3, 3,  3, 'Dazzling mechanical concept, though its heavy exposition occasionally outweighs emotion.',   FALSE),
+
+-- Movie 4: Interstellar (Christopher Nolan)
+(10, 1, 4,  4, 'Visually overwhelming and deeply emotional sci-fi anchored by a father-daughter bond.',      TRUE),
+(11, 5, 4,  5, 'The docking sequence and organ score alone make this an all-time theatrical experience.',    FALSE),
+(12, 4, 4,  3, 'Ambitious cosmic spectacle whose third-act sentimentality softens its scientific rigor.',    TRUE),
+
+-- Movie 5: Oppenheimer (Christopher Nolan)
+(13, 1, 5,  4, 'Relentless three-hour biographical thriller shot in stunning 70mm IMAX.',                    FALSE),
+(14, 3, 5,  5, 'Nolan''s most mature technical achievement; Cillian Murphy is phenomenal throughout.',       FALSE),
+(15, 4, 5,  5, 'A haunting chamber drama disguised as an epic, edited with relentless rhythmic dread.',      FALSE),
+
+-- Movie 6: Dune: Part One (Denis Villeneuve)
+(16, 5, 6,  4, 'Slow-burn world building with jaw-dropping desert cinematography and sound design.',         FALSE),
+(17, 6, 6,  3, 'Immaculately crafted atmosphere, though it clearly ends halfway through the story.',         FALSE),
+(18, 4, 6,  4, 'Monumental brutalist sci-fi that trusts visual scale over frantic exposition.',              FALSE),
+
+-- Movie 7: Dune: Part Two (Denis Villeneuve)
+(19, 2, 7,  5, 'Dune: Part Two was breathtaking in IMAX. Peak modern sci-fi filmmaking.',                    FALSE),
+(20, 5, 7,  5, 'Desert warfare and soundscapes are mindblowing. Best theater experience of 2024.',           FALSE),
+(21, 3, 7,  5, 'Science fiction on a grand, operatic scale with a chillingly tragic final act.',             TRUE),
+
+-- Movie 8: Spirited Away (Hayao Miyazaki)
+(22, 2, 8,  4, 'Pure animated magic; every single frame of the bathhouse belongs in a gallery.',             FALSE),
+(23, 5, 8,  5, 'Heartfelt, strange, and endlessly imaginative coming-of-age storytelling.',                   FALSE),
+(24, 4, 8,  5, 'Miyazaki crafts a timeless allegory of identity, greed, and quiet courage.',                 FALSE),
+
+-- Movie 9: Princess Mononoke (Hayao Miyazaki)
+(25, 6, 9,  4, 'Sweeping hand-drawn fantasy with nuanced moral conflict between nature and industry.',       FALSE),
+(26, 1, 9,  4, 'Joe Hisaishi''s score and Ashitaka''s journey give this epic tremendous weight.',            FALSE),
+(27, 4, 9,  4, 'An ambitious ecological tragedy that refuses simple heroes or villains.',                    FALSE),
+
+-- Movie 10: Parasite (Bong Joon-ho)
+(28, 3, 10, 5, 'Bong Joon-ho dissects class warfare with razor-sharp precision and dark humor.',             TRUE),
+(29, 4, 10, 5, 'Architectural blocking and tonal control rarely seen in contemporary world cinema.',         FALSE),
+(30, 6, 10, 4, 'Unpredictable genre pivots and unforgettable production design from start to finish.',       TRUE),
+
+-- Movie 11: Pulp Fiction (Quentin Tarantino)
+(31, 6, 11, 4, 'Sharp, rhythmic dialogue that redefined 1990s independent American cinema.',                 FALSE),
+(32, 5, 11, 3, 'Iconic scenes and soundtrack, even if the pacing meanders slightly in the middle act.',      FALSE),
+(33, 3, 11, 3, 'Playful postmodern crime mosaic whose stylistic bravura sometimes overshadows substance.',   FALSE),
+
+-- Movie 12: Taxi Driver (Martin Scorsese)
+(34, 3, 12, 5, 'A dark, hypnotic portrait of urban alienation and obsession anchored by Robert De Niro.',    FALSE),
+(35, 6, 12, 3, 'Bleak, atmospheric 1970s character study that deliberately resists easy viewer sympathy.',   FALSE),
+(36, 2, 12, 3, 'Unsettling neon-soaked cinematography and jazz score, though intentionally grueling.',       TRUE);
