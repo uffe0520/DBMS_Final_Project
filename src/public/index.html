@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FilmCraft — Cinema & Festival Curator Platform</title>
+    <title>FilmCraft — Cinema Review & Archive</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
-        
+
         :root {
-            --info-red: #c4122f; /* Editorial signature crimson */
+            --info-red: #c4122f;
             --info-red-hover: #9e0e24;
             --ink-black: #111111;
             --body-text: #262626;
             --muted-text: #666666;
             --paper-bg: #fcfcfc;
             --hairline: #e5e5e5;
-            --hairline-dark: #111111;
         }
 
         * {
-            border-radius: 0px !important; /* Strict sharp broadsheet edges */
+            border-radius: 0px !important;
         }
 
         body {
@@ -41,7 +40,6 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Broadsheet Eyebrow */
         .editorial-kicker {
             font-size: 11px;
             font-weight: 700;
@@ -50,7 +48,6 @@
             color: var(--info-red);
         }
 
-        /* Paper Card Surfaces */
         .editorial-card {
             background: rgba(255, 255, 255, 0.90);
             border: 1px solid var(--hairline);
@@ -64,34 +61,32 @@
         .info-btn-primary {
             background-color: var(--info-red);
             color: #ffffff;
-            transition: all 0.15s ease;
+            transition: background-color 0.15s ease;
         }
         .info-btn-primary:hover {
             background-color: var(--info-red-hover);
         }
 
-        /* RHS Sidebar: Precise Dock Tab Only */
+        /* RHS Navigation Sidebar (opens ONLY on direct dock hover or click) */
         #rhs-sidebar {
             position: fixed;
             top: 0;
             right: 0;
             height: 100vh;
-            width: 320px;
-            background: #ffffff;
+            width: 300px;
+            background: rgba(255, 255, 255, 0.96);
             border-left: 1px solid #111111;
             box-shadow: -15px 0 35px rgba(0, 0, 0, 0.12);
             transform: translateX(100%);
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
             z-index: 70;
         }
-
         #rhs-sidebar.sidebar-open {
             transform: translateX(0);
         }
 
-        /* Compact Dock Button attached to right edge */
         #rhs-nav-dock {
             position: fixed;
             right: 0;
@@ -99,7 +94,7 @@
             transform: translateY(-50%);
             width: 32px;
             padding: 14px 6px;
-            background: #ffffff;
+            background: rgba(255, 255, 255, 0.92);
             border: 1px solid #111111;
             border-right: none;
             display: flex;
@@ -112,7 +107,7 @@
             z-index: 60;
         }
         #rhs-nav-dock:hover {
-            background: #f7f7f7;
+            background: #f5f5f4;
             transform: translateY(-50%) translateX(-2px);
         }
 
@@ -126,53 +121,39 @@
             color: #111111;
         }
 
-        /* Star Rating in Crimson */
-        .star-item {
+        .star-item, .edit-star-item {
             cursor: pointer;
             transition: transform 0.15s ease, color 0.15s ease;
         }
-        .star-item:hover {
+        .star-item:hover, .edit-star-item:hover {
             transform: scale(1.18);
         }
 
         .modal-overlay {
-            background: rgba(18, 18, 18, 0.45);
+            background: rgba(18, 18, 18, 0.48);
             backdrop-filter: blur(2px);
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Top Newspaper Masthead (Broadsheet Aesthetic in English) -->
-    <header class="border-b-2 border-stone-900 bg-white sticky top-0 z-40">
+    <!-- Broadsheet Masthead -->
+    <header class="border-b-2 border-stone-950 bg-white/95 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Sub-bar -->
-            <div class="py-2 border-b border-stone-200 flex items-center justify-between text-[11px] text-stone-500 font-medium">
-                <div class="flex items-center space-x-4">
-                    <span class="text-stone-900 font-bold uppercase tracking-wider">Culture & Cinema</span>
-                    <span>•</span>
-                    <span>Monday, November 16, 2026</span>
-                    <span class="hidden sm:inline">•</span>
-                    <span class="hidden sm:inline">HKU COMP3278A Broadsheet Edition</span>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <span class="flex items-center gap-1.5 text-stone-700">
-                        <span class="w-1.5 h-1.5 bg-[#c4122f]"></span>
-                        <span class="font-mono text-[10px]">MYSQL 8.X LIVE</span>
-                    </span>
-                </div>
+            <div class="py-2 border-b border-stone-200 flex items-center justify-between text-[11px] uppercase tracking-wider text-stone-500 font-medium">
+                <span>FilmCraft Editorial Archive</span>
+                <span class="flex items-center gap-1.5 text-stone-800 font-mono text-[10px]">
+                    <span class="w-1.5 h-1.5 bg-[#c4122f]"></span>
+                    <span>MYSQL 8.X LIVE</span>
+                </span>
             </div>
 
-            <!-- Main Title Bar -->
             <div class="py-4 flex items-center justify-between">
-                <div>
-                    <h1 class="text-3xl sm:text-4xl font-extrabold text-stone-950 serif-title tracking-tight flex items-baseline gap-2">
-                        <span>FilmCraft</span>
-                        <span class="text-xs font-sans font-normal uppercase tracking-widest text-[#c4122f] ml-1">Reviews & Festival Curator</span>
-                    </h1>
-                </div>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-stone-950 serif-title tracking-tight flex items-baseline gap-2 cursor-pointer" onclick="switchTab('movies')">
+                    <span>FilmCraft</span>
+                    <span class="text-xs font-sans font-normal uppercase tracking-widest text-[#c4122f] ml-1">Cinema & Critique</span>
+                </h1>
 
-                <!-- Action Buttons -->
                 <div class="flex items-center space-x-3">
                     <button onclick="openCreateAccountModal()" class="px-3.5 py-1.5 border border-stone-900 bg-white hover:bg-stone-100 text-stone-900 text-xs font-semibold uppercase tracking-wider transition flex items-center gap-1.5">
                         <i class="fa-solid fa-user-plus text-xs text-[#c4122f]"></i>
@@ -187,17 +168,17 @@
         </div>
     </header>
 
-    <!-- Compact RHS Dock Tab (Triggers ONLY when hovering directly on this button) -->
+    <!-- Compact RHS Dock Button (Opens ONLY when hovering directly on this tab) -->
     <div id="rhs-nav-dock" onmouseenter="openSidebar()" onclick="toggleSidebar()" title="Open Navigation">
         <i class="fa-solid fa-bars text-stone-900 text-xs mb-2"></i>
         <span class="vertical-text">NAVIGATION</span>
     </div>
 
-    <!-- Sliding Sidebar Drawer (Closes on mouse leave) -->
+    <!-- Sliding RHS Navigation Sidebar -->
     <aside id="rhs-sidebar" onmouseleave="closeSidebar()">
         <div class="p-6 border-b border-stone-900 bg-stone-50 flex items-center justify-between">
             <div>
-                <span class="editorial-kicker">Navigation Deck</span>
+                <span class="editorial-kicker">Navigation</span>
                 <h3 class="text-lg font-bold text-stone-950 serif-title mt-0.5">Sections</h3>
             </div>
             <button onclick="closeSidebar()" class="w-7 h-7 bg-white hover:bg-stone-200 text-stone-800 border border-stone-300 flex items-center justify-center transition">
@@ -207,45 +188,30 @@
 
         <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
             <button onclick="switchTab('movies')" id="tab-movies" class="nav-item w-full flex items-center p-3 text-left transition bg-stone-100 text-stone-950 font-semibold border-l-2 border-[#c4122f]">
-                <span class="text-xs uppercase tracking-wider">1. Films & Reviews</span>
+                <span class="text-xs uppercase tracking-wider">1. Films Catalog</span>
             </button>
-
-            <button onclick="switchTab('festivals')" id="tab-festivals" class="nav-item w-full flex items-center p-3 text-left transition text-stone-700 hover:bg-stone-50 border-l-2 border-transparent">
-                <span class="text-xs uppercase tracking-wider">2. Festivals & Awards</span>
+            <button onclick="switchTab('reviews')" id="tab-reviews" class="nav-item w-full flex items-center p-3 text-left transition text-stone-700 hover:bg-stone-50 border-l-2 border-transparent">
+                <span class="text-xs uppercase tracking-wider">2. Reviews & Ratings</span>
             </button>
-
-            <button onclick="switchTab('people')" id="tab-people" class="nav-item w-full flex items-center p-3 text-left transition text-stone-700 hover:bg-stone-50 border-l-2 border-transparent">
-                <span class="text-xs uppercase tracking-wider">3. Talent & Honors</span>
-            </button>
-
-            <button onclick="switchTab('screenings')" id="tab-screenings" class="nav-item w-full flex items-center p-3 text-left transition text-stone-700 hover:bg-stone-50 border-l-2 border-transparent">
-                <span class="text-xs uppercase tracking-wider">4. Theaters & Showtimes</span>
-            </button>
-
-            <button onclick="switchTab('division')" id="tab-division" class="nav-item w-full flex items-center p-3 text-left transition text-stone-700 hover:bg-stone-50 border-l-2 border-transparent">
-                <span class="text-xs uppercase tracking-wider">5. Completionist Challenge</span>
-            </button>
-
             <button onclick="switchTab('directors')" id="tab-directors" class="nav-item w-full flex items-center p-3 text-left transition text-stone-700 hover:bg-stone-50 border-l-2 border-transparent">
-                <span class="text-xs uppercase tracking-wider">6. Director Leaderboard</span>
+                <span class="text-xs uppercase tracking-wider">3. Director Leaderboard</span>
             </button>
-
-            <button onclick="switchTab('review')" id="tab-review" class="nav-item w-full flex items-center p-3 text-left transition text-stone-700 hover:bg-stone-50 border-l-2 border-transparent">
-                <span class="text-xs uppercase tracking-wider">7. Log a Review</span>
+            <button onclick="switchTab('division')" id="tab-division" class="nav-item w-full flex items-center p-3 text-left transition text-stone-700 hover:bg-stone-50 border-l-2 border-transparent">
+                <span class="text-xs uppercase tracking-wider">4. Completionist Challenge</span>
             </button>
         </nav>
 
         <div class="p-5 border-t border-stone-200 bg-stone-50 text-[11px] text-stone-500 leading-relaxed font-serif">
-            <strong class="text-stone-900 block font-sans text-xs uppercase mb-1">Enforced Specialization</strong>
-            Disjoint role specialization strictly prevents overlapping cinephiles, critics, and festival curators.
+            <strong class="text-stone-900 block font-sans text-xs uppercase mb-1">Core Relational Archive</strong>
+            Full Create, Read, Update, and Delete operations backed by 6 normalized MySQL tables.
         </div>
     </aside>
 
-    <!-- Main Content Container -->
+    <!-- Main Content -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         <!-- ============================================================ -->
-        <!-- TAB 1: FILMS CATALOG & REVIEWS -->
+        <!-- TAB 1: FILMS CATALOG (READ, SEARCH, CREATE, UPDATE, DELETE) -->
         <!-- ============================================================ -->
         <section id="section-movies" class="tab-section">
             <div class="pb-6 border-b border-stone-300 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -253,57 +219,68 @@
                     <span class="editorial-kicker">Film Catalog</span>
                     <h2 class="text-3xl sm:text-4xl font-bold text-stone-950 serif-title mt-1">Featured Works & Critique</h2>
                     <p class="text-stone-600 text-sm mt-1 max-w-2xl font-serif">
-                        A curated catalog of international films, directors, franchise lineages, and community critique.
+                        Explore, search, add, edit, and curate the international cinema archive.
                     </p>
                 </div>
-                <div>
-                    <button onclick="toggleAddMoviePanel()" class="px-4 py-2 bg-[#c4122f] hover:bg-[#9e0e24] text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-sm transition">
+
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass text-stone-400 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>
+                        <input
+                            type="text"
+                            id="movie-search-input"
+                            oninput="handleSearchInput()"
+                            placeholder="Search title, director, genre..."
+                            class="pl-8 pr-3 py-2 w-full sm:w-64 bg-white border border-stone-300 text-xs text-stone-900 focus:outline-none focus:border-stone-900"
+                        />
+                    </div>
+                    <button onclick="toggleAddMoviePanel()" class="px-4 py-2 info-btn-primary text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm">
                         <i class="fa-solid fa-plus text-xs"></i>
-                        <span>Add Film to Catalog</span>
+                        <span>Add Film</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Expandable Add Movie Panel -->
+            <!-- Collapsible Add Film Panel -->
             <div id="add-movie-panel" class="hidden mt-6 mb-8 editorial-card p-6 bg-stone-50 border-t-2 border-t-stone-900">
                 <div class="flex items-center justify-between pb-4 border-b border-stone-200">
                     <div>
                         <span class="editorial-kicker">Archive Registration</span>
-                        <h3 class="text-xl font-bold text-stone-950 serif-title mt-0.5">Catalog a New Film</h3>
+                        <h3 class="text-xl font-bold text-stone-950 serif-title mt-0.5">Add a New Film</h3>
                     </div>
                     <button onclick="toggleAddMoviePanel()" class="text-stone-400 hover:text-stone-900 text-sm p-1">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
 
-                <form id="add-movie-form" onsubmit="submitNewMovie(event)" class="mt-6 space-y-4">
+                <form id="add-movie-form" onsubmit="submitNewMovie(event)" class="mt-5 space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="md:col-span-2">
                             <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Film Title *</label>
-                            <input type="text" id="movie-input-title" required placeholder="e.g. Taxi Driver" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
+                            <input type="text" id="movie-input-title" required placeholder="e.g. Blade Runner 2049" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Release Year *</label>
-                            <input type="number" id="movie-input-year" required min="1888" max="2035" placeholder="e.g. 1976" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
+                            <input type="number" id="movie-input-year" required min="1888" max="2035" placeholder="e.g. 2017" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Duration (Minutes) *</label>
-                            <input type="number" id="movie-input-duration" required min="1" max="600" placeholder="e.g. 114" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
+                            <input type="number" id="movie-input-duration" required min="1" max="600" placeholder="e.g. 164" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Director Name</label>
-                            <input type="text" id="movie-input-director" placeholder="e.g. Martin Scorsese" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
+                            <input type="text" id="movie-input-director" placeholder="e.g. Denis Villeneuve" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Primary Genre</label>
                             <select id="movie-input-genre" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900">
                                 <option value="Drama">Drama</option>
-                                <option value="Crime">Crime</option>
                                 <option value="Sci-Fi">Sci-Fi</option>
                                 <option value="Action">Action</option>
+                                <option value="Crime">Crime</option>
                                 <option value="Thriller">Thriller</option>
                                 <option value="Mystery">Mystery</option>
                                 <option value="Animation">Animation</option>
@@ -329,20 +306,20 @@
 
                     <div>
                         <div class="flex items-baseline justify-between mb-1">
-                            <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider">Poster Image URL (Optional)</label>
+                            <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider">Poster Image (Optional)</label>
                             <span class="text-[10px] text-stone-500 font-serif italic">Leave empty to use the default blank archive poster</span>
                         </div>
-                        <input type="text" id="movie-input-poster" placeholder="e.g. /posters/my_movie.jpg or https://... (or leave blank)" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
+                        <input type="text" id="movie-input-poster" placeholder="e.g. /posters/my_film.jpg or https://... (or leave blank)" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
                     </div>
 
                     <div>
                         <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Synopsis</label>
-                        <textarea id="movie-input-synopsis" rows="3" placeholder="Summary of the narrative..." class="w-full bg-white border border-stone-300 p-3 text-xs text-stone-900 focus:outline-none focus:border-stone-900"></textarea>
+                        <textarea id="movie-input-synopsis" rows="2" placeholder="Brief summary of the film..." class="w-full bg-white border border-stone-300 p-3 text-xs text-stone-900 focus:outline-none focus:border-stone-900"></textarea>
                     </div>
 
                     <div class="pt-2 flex items-center justify-between">
                         <button type="submit" class="px-5 py-2.5 bg-stone-900 hover:bg-[#c4122f] text-white text-xs font-semibold uppercase tracking-wider transition">
-                            Save Film to Database
+                            Save Film
                         </button>
                         <button type="button" onclick="toggleAddMoviePanel()" class="px-4 py-2 border border-stone-300 text-stone-700 hover:bg-stone-200 text-xs uppercase tracking-wider">
                             Cancel
@@ -353,353 +330,180 @@
                 </form>
             </div>
 
+            <!-- 4-Column Rectangular Theatrical Poster Grid -->
             <div id="movies-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-                <div class="text-stone-500 font-serif p-8">Loading movie catalog from database...</div>
+                <div class="text-stone-500 font-serif p-8">Loading film catalog...</div>
             </div>
         </section>
 
-
         <!-- ============================================================ -->
-        <!-- TAB 2: FILM FESTIVALS, CURATORS & AWARDS -->
+        <!-- TAB 2: REVIEWS & RATINGS (FULL CRUD SHOWCASE) -->
         <!-- ============================================================ -->
-        <section id="section-festivals" class="tab-section hidden">
+        <section id="section-reviews" class="tab-section hidden">
             <div class="pb-6 border-b border-stone-300">
-                <span class="editorial-kicker">Curatorial Network</span>
-                <h2 class="text-3xl sm:text-4xl font-bold text-stone-950 serif-title mt-1">International Film Festivals & Awards</h2>
+                <span class="editorial-kicker">Critique & Ratings</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-stone-950 serif-title mt-1">Community Reviews & Log</h2>
                 <p class="text-stone-600 text-sm mt-1 max-w-2xl font-serif">
-                    Accredited festivals, selection committee curators, and prestigious laurels awarded across editions.
+                    Log a new review, edit existing ratings or commentary, or remove entries with live score recalculation.
                 </p>
             </div>
 
-            <!-- Festivals Overview Cards -->
-            <div class="mt-8">
-                <h3 class="text-xs font-bold text-stone-950 uppercase tracking-widest mb-4">Accredited Festival Organizations</h3>
-                <div id="festivals-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Injected via JS -->
-                </div>
-            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8 items-start">
+                <!-- Left Column: Log a New Review (CREATE) -->
+                <div class="lg:col-span-5 editorial-card p-6 bg-white border-t-2 border-t-stone-900">
+                    <h3 class="text-xs font-bold text-stone-950 uppercase tracking-widest pb-3 border-b border-stone-200">
+                        Log a New Review
+                    </h3>
 
-            <!-- Awards & Nominations Table -->
-            <div class="mt-10">
-                <h3 class="text-xs font-bold text-stone-950 uppercase tracking-widest mb-4">Official Honors, Nominations & Laurel Winners</h3>
-                <div class="overflow-x-auto editorial-card">
-                    <table class="w-full text-left text-sm text-stone-800">
-                        <thead class="bg-stone-50 text-[11px] uppercase tracking-wider text-stone-900 font-bold border-b border-stone-300">
-                            <tr>
-                                <th class="px-5 py-3">Festival</th>
-                                <th class="px-5 py-3">Award Category</th>
-                                <th class="px-5 py-3">Film Title</th>
-                                <th class="px-5 py-3">Nominee / Director</th>
-                                <th class="px-5 py-3">Year</th>
-                                <th class="px-5 py-3">Outcome</th>
-                            </tr>
-                        </thead>
-                        <tbody id="awards-table-body" class="divide-y divide-stone-200 bg-white">
-                            <!-- Injected via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                    <form id="review-form" onsubmit="submitReview(event)" class="mt-5 space-y-5">
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider">Reviewer Account</label>
+                                <button type="button" onclick="openCreateAccountModal()" class="text-xs text-[#c4122f] hover:underline font-semibold flex items-center gap-1">
+                                    <i class="fa-solid fa-user-plus text-[10px]"></i>
+                                    <span>Create Account</span>
+                                </button>
+                            </div>
+                            <select id="input-user" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900">
+                                <option value="">Loading accounts...</option>
+                            </select>
+                        </div>
 
-            <!-- Curators Roster -->
-            <div class="mt-10">
-                <h3 class="text-xs font-bold text-stone-950 uppercase tracking-widest mb-4">Accredited Festival Curators (ISA Subclass)</h3>
-                <div id="curators-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Injected via JS -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1.5">Select Film</label>
+                            <select id="input-movie" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900">
+                                <option value="">Loading films...</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider">Rating (0 to 5 Stars)</label>
+                                <button type="button" onclick="setStarRating(0)" class="text-[11px] text-stone-500 hover:text-stone-900 underline">
+                                    Set 0 Stars
+                                </button>
+                            </div>
+                            <input type="hidden" id="input-rating" value="5">
+                            <div class="flex items-center justify-between bg-stone-50 border border-stone-200 px-4 py-3">
+                                <div class="flex items-center space-x-2 text-xl" id="star-selector">
+                                    <i class="fa-solid fa-star star-item text-[#c4122f]" onclick="setStarRating(1)" onmouseenter="hoverStars(1)" onmouseleave="resetStarHover()"></i>
+                                    <i class="fa-solid fa-star star-item text-[#c4122f]" onclick="setStarRating(2)" onmouseenter="hoverStars(2)" onmouseleave="resetStarHover()"></i>
+                                    <i class="fa-solid fa-star star-item text-[#c4122f]" onclick="setStarRating(3)" onmouseenter="hoverStars(3)" onmouseleave="resetStarHover()"></i>
+                                    <i class="fa-solid fa-star star-item text-[#c4122f]" onclick="setStarRating(4)" onmouseenter="hoverStars(4)" onmouseleave="resetStarHover()"></i>
+                                    <i class="fa-solid fa-star star-item text-[#c4122f]" onclick="setStarRating(5)" onmouseenter="hoverStars(5)" onmouseleave="resetStarHover()"></i>
+                                </div>
+                                <span id="star-score-text" class="text-xs font-serif font-bold text-stone-900">5 / 5 Stars</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1.5">Critique</label>
+                            <textarea id="input-text" rows="3" placeholder="Write your critical thoughts..." class="w-full bg-white border border-stone-300 p-3 text-xs text-stone-900 focus:outline-none focus:border-stone-900"></textarea>
+                        </div>
+
+                        <label class="flex items-center space-x-2 text-xs text-stone-700 cursor-pointer select-none">
+                            <input type="checkbox" id="input-spoilers" class="w-3.5 h-3.5 accent-[#c4122f]">
+                            <span>Review contains plot spoilers</span>
+                        </label>
+
+                        <button type="submit" class="w-full py-2.5 bg-stone-900 hover:bg-[#c4122f] text-white text-xs font-bold uppercase tracking-wider transition">
+                            Submit Review
+                        </button>
+
+                        <div id="review-status" class="hidden p-3 text-xs text-center font-bold"></div>
+                    </form>
+                </div>
+
+                <!-- Right Column: Community Reviews Feed (READ, UPDATE, DELETE) -->
+                <div class="lg:col-span-7">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xs font-bold text-stone-950 uppercase tracking-widest">
+                            Published Reviews
+                        </h3>
+                        <span id="all-reviews-count" class="text-xs font-mono text-stone-500">Loading...</span>
+                    </div>
+
+                    <div id="all-reviews-feed" class="space-y-4">
+                        <div class="editorial-card p-6 text-xs text-stone-500 font-serif">Loading reviews...</div>
+                    </div>
                 </div>
             </div>
         </section>
 
-
         <!-- ============================================================ -->
-        <!-- TAB 3: THEATRICAL SCREENINGS (SHOWTIMES & ADD SCREENING) -->
+        <!-- TAB 3: DIRECTOR LEADERBOARD (AGGREGATION & GROUP BY) -->
         <!-- ============================================================ -->
-        <section id="section-screenings" class="tab-section hidden">
-            <div class="flex flex-col md:flex-row md:items-end justify-between pb-6 border-b border-stone-300 gap-4">
-                <div>
-                    <span class="editorial-kicker">Theatrical Schedule</span>
-                    <h2 class="text-3xl sm:text-4xl font-bold text-stone-950 serif-title mt-1">Cinema Showtimes & Rooms</h2>
-                    <p class="text-stone-600 text-sm mt-1 max-w-2xl font-serif">
-                        Current theatrical screenings, screening formats, and ticket pricing across partnered cinemas.
-                    </p>
-                </div>
-                <button onclick="toggleAddScreeningForm()" class="px-4 py-2 bg-stone-900 hover:bg-[#c4122f] text-white text-xs font-semibold uppercase tracking-wider transition">
-                    + Schedule Screening
-                </button>
+        <section id="section-directors" class="tab-section hidden">
+            <div class="pb-6 border-b border-stone-300">
+                <span class="editorial-kicker">Critical Standings</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-stone-950 serif-title mt-1">Director Leaderboard</h2>
+                <p class="text-stone-600 text-sm mt-1 max-w-2xl font-serif">
+                    Ranked by aggregated average rating and review volume across catalogued filmographies.
+                </p>
             </div>
 
-            <!-- Schedule Form -->
-            <div id="add-screening-panel" class="hidden my-6 editorial-card p-6 border-t-2 border-t-[#c4122f]">
-                <h3 class="text-xs font-bold text-stone-900 uppercase tracking-widest mb-4">
-                    Schedule or Update Theatrical Screening
-                </h3>
-                <form id="screening-form" onsubmit="submitScreening(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                    <div>
-                        <label class="block text-[11px] font-bold text-stone-700 uppercase mb-1">Cinema & Room</label>
-                        <select id="screening-input-room" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900">
-                            <!-- Populated dynamically -->
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] font-bold text-stone-700 uppercase mb-1">Film</label>
-                        <select id="screening-input-movie" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900">
-                            <!-- Populated dynamically -->
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] font-bold text-stone-700 uppercase mb-1">Date & Time</label>
-                        <input type="datetime-local" id="screening-input-time" value="2026-11-10T19:30" class="w-full bg-white border border-stone-300 px-3 py-1.5 text-xs text-stone-900 focus:outline-none focus:border-stone-900">
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] font-bold text-stone-700 uppercase mb-1">Ticket Price (HK$)</label>
-                        <input type="number" id="screening-input-price" step="0.5" value="120.00" min="0" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900">
-                    </div>
-
-                    <div class="flex items-end">
-                        <button type="submit" class="w-full py-2 px-3 info-btn-primary font-bold text-xs uppercase tracking-wider">
-                            Save Schedule
-                        </button>
-                    </div>
-                </form>
-                <div id="screening-status" class="hidden mt-3 p-2 text-xs font-semibold"></div>
-            </div>
-
-            <!-- Screenings Table -->
-            <div class="mt-6 overflow-x-auto editorial-card">
+            <div class="mt-8 overflow-x-auto editorial-card">
                 <table class="w-full text-left text-sm text-stone-800">
                     <thead class="bg-stone-50 text-[11px] uppercase tracking-wider text-stone-900 font-bold border-b border-stone-300">
                         <tr>
-                            <th class="px-5 py-3">Cinema</th>
-                            <th class="px-5 py-3">Room & Format</th>
-                            <th class="px-5 py-3">Film & Director</th>
-                            <th class="px-5 py-3">Date & Time</th>
-                            <th class="px-5 py-3">Ticket Price</th>
-                            <th class="px-5 py-3">Potential Gross</th>
+                            <th class="px-5 py-3.5">Director</th>
+                            <th class="px-5 py-3.5">Nationality</th>
+                            <th class="px-5 py-3.5">Films Directed</th>
+                            <th class="px-5 py-3.5">Total Reviews</th>
+                            <th class="px-5 py-3.5">Average Rating</th>
                         </tr>
                     </thead>
-                    <tbody id="screenings-table-body" class="divide-y divide-stone-200 bg-white">
-                        <!-- Injected via JS -->
+                    <tbody id="directors-table-body" class="divide-y divide-stone-200 bg-white">
+                        <tr>
+                            <td colspan="5" class="px-5 py-6 text-stone-500 font-serif text-center">Loading director leaderboard...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </section>
 
-
         <!-- ============================================================ -->
-        <!-- TAB 4: COMPLETIONIST CHALLENGE (NOLAN MARATHON) -->
+        <!-- TAB 4: COMPLETIONIST CHALLENGE (RELATIONAL DIVISION) -->
         <!-- ============================================================ -->
         <section id="section-division" class="tab-section hidden">
             <div class="pb-6 border-b border-stone-300">
-                <span class="editorial-kicker">Universal Quantification</span>
+                <span class="editorial-kicker">Filmography Milestone</span>
                 <h2 class="text-3xl sm:text-4xl font-bold text-stone-950 serif-title mt-1">Christopher Nolan Completionist Challenge</h2>
                 <p class="text-stone-600 text-sm mt-1 max-w-3xl font-serif">
-                    Recognizing cinephiles who without exception have watched and reviewed every single title directed by Christopher Nolan in the database.
+                    Recognizing reviewers who have watched and reviewed every single Christopher Nolan film in the archive.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-                <!-- Filmography List -->
                 <div class="editorial-card p-6">
                     <div class="flex items-center justify-between mb-4 pb-2 border-b border-stone-200">
                         <h3 class="text-xs font-bold text-stone-950 uppercase tracking-widest">
                             Required Nolan Filmography
                         </h3>
-                        <span id="nolan-count-badge" class="text-xs text-stone-600 font-mono">5 Films Required</span>
+                        <span id="nolan-count-badge" class="text-xs text-stone-600 font-mono">5 Films</span>
                     </div>
-                    <ul id="nolan-movies-list" class="divide-y divide-stone-200">
-                        <!-- Injected via JS -->
-                    </ul>
+                    <ul id="nolan-movies-list" class="divide-y divide-stone-200"></ul>
                 </div>
 
-                <!-- Qualified Completionists -->
                 <div class="editorial-card p-6">
                     <div class="flex items-center justify-between mb-4 pb-2 border-b border-stone-200">
                         <h3 class="text-xs font-bold text-stone-950 uppercase tracking-widest">
-                            Awarded Completionists (R ÷ S)
+                            Verified Completionists
                         </h3>
-                        <span class="text-xs text-[#c4122f] font-mono font-bold">100% Completion</span>
+                        <span class="text-xs text-[#c4122f] font-semibold uppercase tracking-wider">100% Complete</span>
                     </div>
-                    <div id="division-winners-container" class="space-y-3">
-                        <!-- Injected via JS -->
-                    </div>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- ============================================================ -->
-        <!-- TAB 5: DIRECTORS LEADERBOARD -->
-        <!-- ============================================================ -->
-        <section id="section-directors" class="tab-section hidden">
-            <div class="pb-6 border-b border-stone-300">
-                <span class="editorial-kicker">Director Rankings</span>
-                <h2 class="text-3xl sm:text-4xl font-bold text-stone-950 serif-title mt-1">Director Leaderboard</h2>
-                <p class="text-stone-600 text-sm mt-1 font-serif">
-                    Cumulative filmography records, community review ratings, and major festival awards won.
-                </p>
-            </div>
-
-            <div class="mt-6 overflow-x-auto editorial-card">
-                <table class="w-full text-left text-sm text-stone-800">
-                    <thead class="bg-stone-50 text-[11px] uppercase tracking-wider text-stone-900 font-bold border-b border-stone-300">
-                        <tr>
-                            <th class="px-5 py-3">Director</th>
-                            <th class="px-5 py-3">Nationality</th>
-                            <th class="px-5 py-3">Films Directed</th>
-                            <th class="px-5 py-3">Reviews</th>
-                            <th class="px-5 py-3">Average Rating</th>
-                            <th class="px-5 py-3">Festival Awards</th>
-                        </tr>
-                    </thead>
-                    <tbody id="directors-table-body" class="divide-y divide-stone-200 bg-white">
-                        <!-- Injected via JS -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-
-        <!-- ============================================================ -->
-        <!-- TAB 6: LOG A REVIEW (0–5 STARS) -->
-        <!-- ============================================================ -->
-        <section id="section-review" class="tab-section hidden">
-            <div class="max-w-2xl mx-auto">
-                <div class="pb-6 border-b border-stone-300 text-center">
-                    <span class="editorial-kicker">Critique & Ratings</span>
-                    <h2 class="text-3xl font-bold text-stone-950 serif-title mt-1">Log a Movie Review</h2>
-                    <p class="text-stone-600 text-sm mt-1 font-serif">
-                        Submit your star rating and critical perspective to the community database.
-                    </p>
-                </div>
-
-                <form id="review-form" onsubmit="submitReview(event)" class="mt-8 space-y-6 editorial-card p-8 bg-white">
-                    <div>
-                        <div class="flex items-center justify-between mb-1.5">
-                            <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider">User Account</label>
-                            <button type="button" onclick="openCreateAccountModal()" class="text-xs text-[#c4122f] hover:underline font-semibold flex items-center gap-1">
-                                <i class="fa-solid fa-user-plus text-[10px]"></i>
-                                <span>+ Register as Reviewer</span>
-                            </button>
-                        </div>
-                        <select id="input-user" class="w-full bg-white border border-stone-300 px-3.5 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-stone-900">
-                            <option value="">Loading accounts...</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1.5">Select Film</label>
-                        <select id="input-movie" class="w-full bg-white border border-stone-300 px-3.5 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-stone-900">
-                            <!-- Populated dynamically -->
-                        </select>
-                    </div>
-
-                    <!-- 0 to 5 Stars Interactive Selector -->
-                    <div>
-                        <div class="flex items-center justify-between mb-1.5">
-                            <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider">Star Rating (0 to 5 Stars)</label>
-                            <span id="star-score-text" class="text-xs font-serif font-bold text-[#c4122f]">★★★★★ (5 / 5 Stars - Masterpiece)</span>
-                        </div>
-
-                        <div class="flex items-center gap-4 bg-stone-50 border border-stone-200 p-3.5">
-                            <div id="star-container" class="flex items-center space-x-1 text-2xl text-[#c4122f]" onmouseleave="resetStarHover()">
-                                <i class="fa-solid fa-star star-item" data-val="1" onmouseover="hoverStars(1)" onclick="setRating(1)"></i>
-                                <i class="fa-solid fa-star star-item" data-val="2" onmouseover="hoverStars(2)" onclick="setRating(2)"></i>
-                                <i class="fa-solid fa-star star-item" data-val="3" onmouseover="hoverStars(3)" onclick="setRating(3)"></i>
-                                <i class="fa-solid fa-star star-item" data-val="4" onmouseover="hoverStars(4)" onclick="setRating(4)"></i>
-                                <i class="fa-solid fa-star star-item" data-val="5" onmouseover="hoverStars(5)" onclick="setRating(5)"></i>
-                            </div>
-
-                            <button type="button" onclick="setRating(0)" class="ml-auto text-xs px-2.5 py-1 bg-white hover:bg-stone-100 border border-stone-300 text-stone-700 font-medium transition">
-                                Set 0★
-                            </button>
-                        </div>
-                        <input type="hidden" id="input-rating" value="5">
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1.5">Review Commentary</label>
-                        <textarea id="input-text" rows="3" placeholder="Share your perspective on direction, cinematography, pacing..." class="w-full bg-white border border-stone-300 p-3 text-xs text-stone-900 focus:outline-none focus:border-stone-900"></textarea>
-                    </div>
-
-                    <div class="flex items-center">
-                        <input type="checkbox" id="input-spoilers" class="border-stone-300 text-[#c4122f] h-4 w-4">
-                        <label for="input-spoilers" class="ml-2 text-xs text-stone-600">Review contains plot spoilers</label>
-                    </div>
-
-                    <button type="submit" class="w-full py-3 info-btn-primary font-bold text-xs uppercase tracking-wider">
-                        Submit Review
-                    </button>
-
-                    <!-- Status Display: Simply outputs "Success" -->
-                    <div id="review-status" class="hidden p-3 text-xs text-center font-bold"></div>
-                </form>
-            </div>
-        </section>
-
-
-        <!-- ============================================================ -->
-        <!-- TAB 3: FILM TALENT & ACCOLADES -->
-        <!-- ============================================================ -->
-        <section id="section-people" class="tab-section hidden">
-            <div class="pb-6 border-b border-stone-300">
-                <span class="editorial-kicker">Film Talent & Honors</span>
-                <h2 class="text-3xl sm:text-4xl font-bold text-stone-950 serif-title mt-1">Honored Filmmakers, Artists & Cast</h2>
-                <p class="text-stone-600 text-sm mt-1 max-w-3xl font-serif">
-                    Biographies, creative disciplines, catalogued filmographies, and individual festival honors awarded across cinema history.
-                </p>
-            </div>
-
-            <!-- 1. Official Individual Awards Register -->
-            <div class="mt-8">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xs font-bold text-stone-950 uppercase tracking-widest">
-                        Individual Honors & Festival Accolades
-                    </h3>
-                    <span id="awards-people-count" class="text-xs text-stone-500 font-mono">Loading honors...</span>
-                </div>
-
-                <div class="overflow-x-auto editorial-card">
-                    <table class="w-full text-left text-sm text-stone-800">
-                        <thead class="bg-stone-50 text-[11px] uppercase tracking-wider text-stone-900 font-bold border-b border-stone-300">
-                            <tr>
-                                <th class="px-5 py-3.5">Honoree</th>
-                                <th class="px-5 py-3.5">Award Category</th>
-                                <th class="px-5 py-3.5">Festival & Host City</th>
-                                <th class="px-5 py-3.5">Film Title</th>
-                                <th class="px-5 py-3.5">Year</th>
-                                <th class="px-5 py-3.5">Honor Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="awards-people-table-body" class="divide-y divide-stone-200 bg-white">
-                            <tr>
-                                <td colspan="6" class="px-5 py-6 text-stone-500 font-serif text-center">Loading honors from database...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 2. Talent Profiles & Filmographies -->
-            <div class="mt-12">
-                <h3 class="text-xs font-bold text-stone-950 uppercase tracking-widest mb-4">
-                    Filmmakers, Cast & Creative Ensemble
-                </h3>
-
-                <div id="professionals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Injected dynamically via JS -->
+                    <div id="division-winners-container" class="divide-y divide-stone-200"></div>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- Reviews Modal Dialog -->
+    <!-- ============================================================ -->
+    <!-- MODAL 1: FILM REVIEWS READER (WITH INLINE EDIT & DELETE) -->
+    <!-- ============================================================ -->
     <div id="reviews-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-overlay">
         <div class="bg-white max-w-2xl w-full max-h-[85vh] flex flex-col border-2 border-stone-900 shadow-2xl">
-            <!-- Modal Header -->
             <div class="p-6 border-b border-stone-200 flex items-center justify-between bg-stone-50">
                 <div class="flex items-center gap-4">
                     <img id="modal-movie-poster" src="" alt="Poster" class="w-12 aspect-[2/3] object-cover border border-stone-300 shadow-sm hidden" />
@@ -713,12 +517,8 @@
                 </button>
             </div>
 
-            <!-- Modal Content -->
-            <div id="modal-reviews-list" class="p-6 overflow-y-auto space-y-4">
-                <div class="text-stone-500 text-xs py-4">Fetching reviews from database...</div>
-            </div>
+            <div id="modal-reviews-list" class="p-6 overflow-y-auto space-y-4"></div>
 
-            <!-- Modal Footer -->
             <div class="p-4 border-t border-stone-200 bg-stone-50 flex justify-end">
                 <button onclick="closeReviewsModal()" class="px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold uppercase tracking-wider">
                     Close
@@ -727,10 +527,152 @@
         </div>
     </div>
 
-    <!-- Create Account Modal Dialog -->
+    <!-- ============================================================ -->
+    <!-- MODAL 2: EDIT REVIEW (EXPLICIT UPDATE) -->
+    <!-- ============================================================ -->
+    <div id="edit-review-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white max-w-lg w-full flex flex-col border-2 border-stone-900 shadow-2xl">
+            <div class="p-6 border-b border-stone-200 flex items-center justify-between bg-stone-50">
+                <div>
+                    <span class="editorial-kicker">Update Critique</span>
+                    <h3 id="edit-review-heading" class="text-xl font-bold text-stone-950 serif-title mt-0.5">Edit Review</h3>
+                </div>
+                <button onclick="closeEditReviewModal()" class="w-8 h-8 bg-white hover:bg-stone-200 text-stone-900 border border-stone-300 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <form id="edit-review-form" onsubmit="submitEditReview(event)" class="p-6 space-y-4">
+                <input type="hidden" id="edit-review-id">
+                <input type="hidden" id="edit-review-rating" value="5">
+
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider">Updated Rating (0–5 Stars)</label>
+                        <button type="button" onclick="setEditStarRating(0)" class="text-[11px] text-stone-500 hover:text-stone-900 underline">Set 0 Stars</button>
+                    </div>
+                    <div class="flex items-center justify-between bg-stone-50 border border-stone-200 px-4 py-3">
+                        <div class="flex items-center space-x-2 text-xl" id="edit-star-selector">
+                            <i class="fa-solid fa-star edit-star-item text-[#c4122f]" onclick="setEditStarRating(1)"></i>
+                            <i class="fa-solid fa-star edit-star-item text-[#c4122f]" onclick="setEditStarRating(2)"></i>
+                            <i class="fa-solid fa-star edit-star-item text-[#c4122f]" onclick="setEditStarRating(3)"></i>
+                            <i class="fa-solid fa-star edit-star-item text-[#c4122f]" onclick="setEditStarRating(4)"></i>
+                            <i class="fa-solid fa-star edit-star-item text-[#c4122f]" onclick="setEditStarRating(5)"></i>
+                        </div>
+                        <span id="edit-star-score-text" class="text-xs font-serif font-bold text-stone-900">5 / 5 Stars</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Review Text</label>
+                    <textarea id="edit-review-text" rows="4" class="w-full bg-white border border-stone-300 p-3 text-xs text-stone-900 focus:outline-none focus:border-stone-900"></textarea>
+                </div>
+
+                <label class="flex items-center space-x-2 text-xs text-stone-700 cursor-pointer select-none">
+                    <input type="checkbox" id="edit-review-spoilers" class="w-3.5 h-3.5 accent-[#c4122f]">
+                    <span>Review contains plot spoilers</span>
+                </label>
+
+                <div class="pt-2 flex items-center justify-between">
+                    <button type="submit" class="px-5 py-2.5 bg-stone-900 hover:bg-[#c4122f] text-white text-xs font-semibold uppercase tracking-wider transition">
+                        Save Changes
+                    </button>
+                    <button type="button" onclick="closeEditReviewModal()" class="px-4 py-2 border border-stone-300 text-stone-700 hover:bg-stone-100 text-xs uppercase tracking-wider">
+                        Cancel
+                    </button>
+                </div>
+
+                <div id="edit-review-status" class="hidden p-2.5 text-xs font-bold text-center"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL 3: EDIT FILM (EXPLICIT UPDATE) -->
+    <!-- ============================================================ -->
+    <div id="edit-movie-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white max-w-xl w-full max-h-[90vh] flex flex-col border-2 border-stone-900 shadow-2xl">
+            <div class="p-6 border-b border-stone-200 flex items-center justify-between bg-stone-50">
+                <div>
+                    <span class="editorial-kicker">Update Archive Entry</span>
+                    <h3 class="text-xl font-bold text-stone-950 serif-title mt-0.5">Edit Film Details</h3>
+                </div>
+                <button onclick="closeEditMovieModal()" class="w-8 h-8 bg-white hover:bg-stone-200 text-stone-900 border border-stone-300 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <form id="edit-movie-form" onsubmit="submitEditMovie(event)" class="p-6 space-y-4 overflow-y-auto">
+                <input type="hidden" id="edit-movie-id">
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Film Title *</label>
+                        <input type="text" id="edit-movie-title" required class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Year *</label>
+                        <input type="number" id="edit-movie-year" required min="1888" max="2035" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Duration (Min) *</label>
+                        <input type="number" id="edit-movie-duration" required min="1" max="600" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Director</label>
+                        <input type="text" id="edit-movie-director" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Primary Genre</label>
+                        <input type="text" id="edit-movie-genre" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Language</label>
+                        <input type="text" id="edit-movie-language" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Prequel Film</label>
+                        <select id="edit-movie-prequel" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900">
+                            <option value="">None (Standalone Film)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Poster Image URL (Optional)</label>
+                    <input type="text" id="edit-movie-poster" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Synopsis</label>
+                    <textarea id="edit-movie-synopsis" rows="3" class="w-full bg-white border border-stone-300 p-3 text-xs text-stone-900 focus:outline-none focus:border-stone-900"></textarea>
+                </div>
+
+                <div class="pt-2 flex items-center justify-between">
+                    <button type="submit" class="px-5 py-2.5 bg-stone-900 hover:bg-[#c4122f] text-white text-xs font-semibold uppercase tracking-wider transition">
+                        Save Film Changes
+                    </button>
+                    <button type="button" onclick="closeEditMovieModal()" class="px-4 py-2 border border-stone-300 text-stone-700 hover:bg-stone-100 text-xs uppercase tracking-wider">
+                        Cancel
+                    </button>
+                </div>
+
+                <div id="edit-movie-status" class="hidden p-2.5 text-xs font-bold text-center"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MODAL 4: CREATE REVIEWER ACCOUNT -->
+    <!-- ============================================================ -->
     <div id="create-account-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-overlay">
         <div class="bg-white max-w-lg w-full max-h-[90vh] flex flex-col border-2 border-stone-900 shadow-2xl">
-            <!-- Modal Header -->
             <div class="p-6 border-b border-stone-200 flex items-center justify-between bg-stone-50">
                 <div>
                     <span class="editorial-kicker">Membership Register</span>
@@ -741,7 +683,6 @@
                 </button>
             </div>
 
-            <!-- Modal Content Form -->
             <form id="create-account-form" onsubmit="submitNewAccount(event)" class="p-6 space-y-4 overflow-y-auto">
                 <div>
                     <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Username *</label>
@@ -761,30 +702,18 @@
                     </select>
                 </div>
 
-                <!-- Cinephile-Specific Fields -->
-                <div id="acc-cinephile-fields" class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Membership Tier</label>
-                            <select id="acc-input-tier" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900">
-                                <option value="FREE">Free Member</option>
-                                <option value="PRO">Pro Cinephile</option>
-                                <option value="PATRON">Patron Cinephile</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Favorite Genre</label>
-                            <input type="text" id="acc-input-genre" placeholder="e.g. Sci-Fi" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
-                        </div>
-                    </div>
+                <div id="acc-cinephile-fields">
+                    <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Membership Tier</label>
+                    <select id="acc-input-tier" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900">
+                        <option value="FREE">Free Member</option>
+                        <option value="PRO">Pro Cinephile</option>
+                        <option value="PATRON">Patron Cinephile</option>
+                    </select>
                 </div>
 
-                <!-- Critic-Specific Fields -->
-                <div id="acc-critic-fields" class="hidden space-y-4">
-                    <div>
-                        <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Publication Name</label>
-                        <input type="text" id="acc-input-publication" placeholder="e.g. Dagbladet Information" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
-                    </div>
+                <div id="acc-critic-fields" class="hidden">
+                    <label class="block text-[11px] font-bold text-stone-800 uppercase tracking-wider mb-1">Publication Name</label>
+                    <input type="text" id="acc-input-publication" placeholder="e.g. Dagbladet Information" class="w-full bg-white border border-stone-300 px-3 py-2 text-xs text-stone-900 focus:outline-none focus:border-stone-900" />
                 </div>
 
                 <div class="pt-2 flex items-center justify-between">
@@ -796,272 +725,134 @@
                     </button>
                 </div>
 
-                <div id="acc-status" class="hidden p-3 text-xs font-bold text-center"></div>
+                <div id="acc-status" class="hidden p-2.5 text-xs font-bold text-center"></div>
             </form>
         </div>
     </div>
 
-    <!-- Broadsheet Minimalist Footer -->
-    <footer class="border-t border-stone-300 bg-white py-10 text-center text-xs text-stone-500 font-serif">
+    <!-- Broadsheet Footer -->
+    <footer class="border-t border-stone-300 bg-white py-8 text-center text-xs text-stone-500 font-serif mt-12">
         <p class="font-sans font-semibold text-stone-900 uppercase tracking-widest text-[11px]">FilmCraft — Database Management Systems</p>
         <p class="mt-1">School of Computing & Data Science, The University of Hong Kong</p>
     </footer>
 
-    <!-- JavaScript Application Logic -->
     <script>
+        const defaultPoster = '/posters/default_blank.svg';
         let cachedMovies = [];
-        let cachedTheaters = [];
         let currentSelectedRating = 5;
+        let currentModalMovie = null;
+        let searchTimer = null;
 
-        // Authentic Theatrical Movie Posters (2:3 Aspect Ratio)
-        const moviePosters = {
-            1: "/posters/memento.jpg",
-            2: "/posters/Thedarkknight.jpg",
-            3: "/posters/Inception.jpg",
-            4: "/posters/INterstellar.jpg",
-            5: "/posters/Oppenheimer.jpg",
-            6: "/posters/DunePt1.jpg",
-            7: "/posters/dunept2.jpg",
-            8: "/posters/SpirtedAway.jpg",
-            9: "/posters/Mononoke.jpg",
-            10: "/posters/Parasite.jpg",
-            11: "/posters/PulpFiction.jpg"
-        };
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
-        const defaultPoster = "/posters/default_blank.svg";
-
-        // Sidebar Navigation
+        // ---- RHS Navigation Sidebar ----
         function openSidebar() {
             document.getElementById('rhs-sidebar').classList.add('sidebar-open');
         }
-
         function closeSidebar() {
             document.getElementById('rhs-sidebar').classList.remove('sidebar-open');
         }
-
         function toggleSidebar() {
             document.getElementById('rhs-sidebar').classList.toggle('sidebar-open');
         }
-
         document.addEventListener('click', (e) => {
             const sidebar = document.getElementById('rhs-sidebar');
             const dock = document.getElementById('rhs-nav-dock');
-            if (sidebar && sidebar.classList.contains('sidebar-open') && 
-                !sidebar.contains(e.target) && 
-                !dock.contains(e.target) && 
+            if (sidebar.classList.contains('sidebar-open') &&
+                !sidebar.contains(e.target) &&
+                !dock.contains(e.target) &&
                 !e.target.closest('button[onclick="toggleSidebar()"]')) {
-                sidebar.classList.remove('sidebar-open');
+                closeSidebar();
             }
         });
 
-        // Create Account Modal Management
-        function openCreateAccountModal() {
-            document.getElementById('create-account-modal').classList.remove('hidden');
-        }
+        // ---- Tab Switching ----
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('bg-stone-100', 'text-stone-950', 'border-[#c4122f]', 'font-semibold');
+                btn.classList.add('text-stone-700', 'border-transparent');
+            });
 
-        function closeCreateAccountModal() {
-            document.getElementById('create-account-modal').classList.add('hidden');
-            const status = document.getElementById('acc-status');
-            if (status) status.className = 'hidden';
-        }
+            const sec = document.getElementById(`section-${tabId}`);
+            if (sec) sec.classList.remove('hidden');
 
-        function toggleAccountRoleFields() {
-            const role = document.getElementById('acc-input-role').value;
-            const cineFields = document.getElementById('acc-cinephile-fields');
-            const criticFields = document.getElementById('acc-critic-fields');
-            if (role === 'CRITIC') {
-                cineFields.classList.add('hidden');
-                criticFields.classList.remove('hidden');
-            } else {
-                cineFields.classList.remove('hidden');
-                criticFields.classList.add('hidden');
-            }
-        }
-
-        // Fetch Users for Reviewer Select
-        async function fetchUsers(selectNewUserId = null) {
-            try {
-                const res = await fetch('/api/users');
-                const data = await res.json();
-                if (data.success) {
-                    const select = document.getElementById('input-user');
-                    if (select) {
-                        select.innerHTML = data.data.map(u => {
-                            const desc = u.role === 'CRITIC' ? 
-                                `Film Critic, ${u.publication_name || 'Independent'}` : 
-                                `${u.membership_tier || 'Member'} Cinephile`;
-                            return `<option value="${u.user_id}">${u.username} (${desc})</option>`;
-                        }).join('');
-
-                        if (selectNewUserId) {
-                            select.value = selectNewUserId;
-                        }
-                    }
-                }
-            } catch (err) {
-                console.error('Failed to load users:', err);
-            }
-        }
-
-        // Submit New User Account (Atomic Transaction via /api/users)
-        async function submitNewAccount(event) {
-            event.preventDefault();
-            const statusDiv = document.getElementById('acc-status');
-            const payload = {
-                username: document.getElementById('acc-input-username').value,
-                email: document.getElementById('acc-input-email').value,
-                role: document.getElementById('acc-input-role').value,
-                membership_tier: document.getElementById('acc-input-tier').value,
-                favorite_genre: document.getElementById('acc-input-genre').value,
-                publication_name: document.getElementById('acc-input-publication').value
-            };
-
-            statusDiv.className = 'mt-3 p-2 bg-stone-100 text-stone-700 block';
-            statusDiv.innerText = 'Creating account...';
-
-            try {
-                const res = await fetch('/api/users', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                if (data.success) {
-                    statusDiv.className = 'mt-3 p-2 bg-emerald-50 text-emerald-800 block';
-                    statusDiv.innerText = 'Success';
-                    await fetchUsers(data.user.user_id);
-                    document.getElementById('create-account-form').reset();
-                    setTimeout(() => {
-                        closeCreateAccountModal();
-                    }, 800);
-                } else {
-                    statusDiv.className = 'mt-3 p-2 bg-rose-50 text-[#c4122f] block';
-                    statusDiv.innerText = 'Error: ' + data.error;
-                }
-            } catch (err) {
-                statusDiv.className = 'mt-3 p-2 bg-rose-50 text-[#c4122f] block';
-                statusDiv.innerText = 'Error: ' + err.message;
-            }
-        }
-
-        // Toggle Add Movie Form
-        function toggleAddMoviePanel() {
-            const panel = document.getElementById('add-movie-panel');
-            panel.classList.toggle('hidden');
-        }
-
-        // Submit New Movie
-        async function submitNewMovie(event) {
-            event.preventDefault();
-            const statusDiv = document.getElementById('add-movie-status');
-            
-            let rawPoster = document.getElementById('movie-input-poster').value.trim();
-            if (rawPoster) {
-                if (rawPoster.includes('posters/')) {
-                    const filename = rawPoster.split('posters/').pop().split(/[\\/]/).pop();
-                    rawPoster = '/posters/' + filename;
-                } else if (!rawPoster.startsWith('http://') && !rawPoster.startsWith('https://') && !rawPoster.startsWith('/')) {
-                    rawPoster = '/posters/' + rawPoster;
-                }
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-stone-100', 'text-stone-950', 'border-[#c4122f]', 'font-semibold');
+                activeBtn.classList.remove('text-stone-700', 'border-transparent');
             }
 
-            const payload = {
-                title: document.getElementById('movie-input-title').value,
-                release_year: document.getElementById('movie-input-year').value,
-                duration_minutes: document.getElementById('movie-input-duration').value,
-                director_name: document.getElementById('movie-input-director').value,
-                genre_name: document.getElementById('movie-input-genre').value,
-                language: document.getElementById('movie-input-language').value,
-                prequel_movie_id: document.getElementById('movie-input-prequel').value || null,
-                poster_url: rawPoster || null,
-                synopsis: document.getElementById('movie-input-synopsis').value || null
-            };
-
-            statusDiv.className = 'mt-3 p-2 bg-stone-100 text-stone-700 block';
-            statusDiv.innerText = 'Cataloguing film...';
-
-            try {
-                const res = await fetch('/api/movies', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                if (data.success) {
-                    statusDiv.className = 'mt-3 p-2 bg-emerald-50 text-emerald-800 block';
-                    statusDiv.innerText = 'Success';
-                    document.getElementById('add-movie-form').reset();
-                    fetchMovies();
-                    fetchDirectors();
-                    fetchProfessionals();
-                    setTimeout(() => {
-                        toggleAddMoviePanel();
-                        statusDiv.className = 'hidden';
-                    }, 900);
-                } else {
-                    statusDiv.className = 'mt-3 p-2 bg-rose-50 text-[#c4122f] block';
-                    statusDiv.innerText = 'Error: ' + data.error;
-                }
-            } catch (err) {
-                statusDiv.className = 'mt-3 p-2 bg-rose-50 text-[#c4122f] block';
-                statusDiv.innerText = 'Error: ' + err.message;
-            }
+            closeSidebar();
+            if (tabId === 'movies') fetchMovies();
+            if (tabId === 'reviews') { fetchAllReviews(); fetchUsers(); }
+            if (tabId === 'directors') fetchDirectors();
+            if (tabId === 'division') fetchDivision();
         }
 
-        // Toggle Add Screening Form
-        function toggleAddScreeningForm() {
-            const form = document.getElementById('add-screening-panel');
-            form.classList.toggle('hidden');
-        }
-
-        // Star Rating (Information Red)
-        const ratingDescriptions = [
-            '☆☆☆☆☆ (0 / 5 Stars - Poor)',
-            '★☆☆☆☆ (1 / 5 Stars - Subpar)',
-            '★★☆☆☆ (2 / 5 Stars - Mediocre)',
-            '★★★☆☆ (3 / 5 Stars - Decent)',
-            '★★★★☆ (4 / 5 Stars - Highly Recommended)',
-            '★★★★★ (5 / 5 Stars - Masterpiece)'
-        ];
-
-        function setRating(val) {
+        // ---- Star Rating (Create Review) ----
+        function setStarRating(val) {
             currentSelectedRating = val;
             document.getElementById('input-rating').value = val;
-            updateStarVisuals(val);
-            document.getElementById('star-score-text').innerText = ratingDescriptions[val];
+            updateStars('#star-selector .star-item', val);
+            document.getElementById('star-score-text').innerText = `${val} / 5 Stars`;
         }
-
         function hoverStars(val) {
-            updateStarVisuals(val);
-            document.getElementById('star-score-text').innerText = ratingDescriptions[val];
+            updateStars('#star-selector .star-item', val);
+            document.getElementById('star-score-text').innerText = `${val} / 5 Stars`;
         }
-
         function resetStarHover() {
-            updateStarVisuals(currentSelectedRating);
-            document.getElementById('star-score-text').innerText = ratingDescriptions[currentSelectedRating];
+            updateStars('#star-selector .star-item', currentSelectedRating);
+            document.getElementById('star-score-text').innerText = `${currentSelectedRating} / 5 Stars`;
         }
-
-        function updateStarVisuals(count) {
-            const stars = document.querySelectorAll('.star-item');
-            stars.forEach((star, index) => {
-                const starVal = index + 1;
-                if (starVal <= count) {
-                    star.className = 'fa-solid fa-star star-item text-[#c4122f]';
+        function updateStars(selector, count) {
+            document.querySelectorAll(selector).forEach((star, idx) => {
+                if (idx + 1 <= count) {
+                    star.className = star.className.replace('fa-regular', 'fa-solid').replace('text-stone-300', 'text-[#c4122f]');
+                    if (!star.classList.contains('text-[#c4122f]')) star.classList.add('text-[#c4122f]');
                 } else {
-                    star.className = 'fa-regular fa-star star-item text-stone-300';
+                    star.className = star.className.replace('fa-solid', 'fa-regular').replace('text-[#c4122f]', 'text-stone-300');
+                    if (!star.classList.contains('text-stone-300')) star.classList.add('text-stone-300');
                 }
             });
         }
 
-        // API 1: Fetch and Render Movies
-        async function fetchMovies() {
+        // ---- Star Rating (Edit Review Modal) ----
+        function setEditStarRating(val) {
+            document.getElementById('edit-review-rating').value = val;
+            updateStars('#edit-star-selector .edit-star-item', val);
+            document.getElementById('edit-star-score-text').innerText = `${val} / 5 Stars`;
+        }
+
+        // ============================================================
+        // MOVIES CRUD (READ, SEARCH, CREATE, UPDATE, DELETE)
+        // ============================================================
+        function handleSearchInput() {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                const q = document.getElementById('movie-search-input').value.trim();
+                fetchMovies(q);
+            }, 180);
+        }
+
+        async function fetchMovies(query = '') {
             try {
-                const res = await fetch('/api/movies');
+                const url = query ? `/api/movies?q=${encodeURIComponent(query)}` : '/api/movies';
+                const res = await fetch(url);
                 const data = await res.json();
                 if (data.success) {
-                    cachedMovies = data.data;
+                    if (!query) {
+                        cachedMovies = data.data;
+                        populateMovieSelects(data.data);
+                    }
                     renderMovies(data.data);
-                    populateMovieSelects(data.data);
                 }
             } catch (err) {
                 console.error('Failed to load movies:', err);
@@ -1070,45 +861,60 @@
 
         function renderMovies(movies) {
             const container = document.getElementById('movies-container');
+            if (movies.length === 0) {
+                container.innerHTML = `<div class="col-span-full editorial-card p-10 text-center text-stone-500 font-serif">No films match your search.</div>`;
+                return;
+            }
+
             container.innerHTML = movies.map(m => {
-                const poster = m.poster_url || moviePosters[m.movie_id] || defaultPoster;
-                const score = m.average_rating > 0 ? (m.average_rating > 5 ? (m.average_rating / 2).toFixed(1) : parseFloat(m.average_rating).toFixed(1)) : '0.0';
+                const poster = m.poster_url || defaultPoster;
+                const score = m.average_rating > 0 ? parseFloat(m.average_rating).toFixed(1) : '—';
+                const primaryGenre = m.genres ? m.genres.split(',')[0] : 'Feature';
+
                 return `
                     <article class="editorial-card overflow-hidden flex flex-col justify-between h-full group hover:shadow-md transition">
-                        <!-- Rectangular Theatrical Poster (2:3 Aspect Ratio) -->
                         <div class="relative aspect-[2/3] w-full bg-stone-900 overflow-hidden border-b border-stone-200">
-                            <img src="${poster}" alt="${m.title}" onerror="this.onerror=null; this.src='/posters/default_blank.svg';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
-                            
-                            <!-- Rating Badge (Sharp Broadsheet Pill) -->
+                            <img
+                                src="${escapeHtml(poster)}"
+                                alt="${escapeHtml(m.title)}"
+                                onerror="this.onerror=null; this.src='${defaultPoster}';"
+                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                loading="lazy"
+                            />
                             <div class="absolute top-2.5 right-2.5 bg-white/95 text-[#c4122f] font-serif font-bold text-xs px-2.5 py-0.5 shadow-sm border border-stone-200">
-                                ★ ${m.average_rating > 0 ? score : '—'}
+                                ★ ${score}
                             </div>
                         </div>
 
-                        <!-- Card Body: Editorial Proportions & Typography -->
                         <div class="p-4 flex-1 flex flex-col justify-between">
                             <div>
-                                <span class="editorial-kicker text-[10px]">${m.genres ? m.genres.split(',')[0] : 'Feature'}</span>
-                                <h3 class="text-lg font-bold text-stone-950 serif-title mt-0.5 leading-tight group-hover:text-[#c4122f] transition">${m.title}</h3>
-                                
+                                <span class="editorial-kicker text-[10px]">${escapeHtml(primaryGenre)}</span>
+                                <h3 class="text-lg font-bold text-stone-950 serif-title mt-0.5 leading-tight group-hover:text-[#c4122f] transition">${escapeHtml(m.title)}</h3>
                                 <p class="text-[11px] uppercase tracking-wider text-stone-500 font-semibold mt-1">
-                                    ${m.director_name || 'Unknown'} • ${m.release_year} • ${m.duration_minutes}m
+                                    ${escapeHtml(m.director_name || 'Unknown')} • ${m.release_year} • ${m.duration_minutes}m
                                 </p>
 
                                 ${m.prequel_title ? `
                                     <p class="mt-2 text-xs text-stone-600 italic font-serif">
-                                        Sequel to <strong class="text-stone-900 not-italic font-semibold">${m.prequel_title}</strong>
+                                        Sequel to <strong class="text-stone-900 not-italic font-semibold">${escapeHtml(m.prequel_title)}</strong>
                                     </p>
                                 ` : ''}
 
                                 <p class="text-xs text-stone-700 mt-2 font-serif line-clamp-3 leading-relaxed">
-                                    ${m.synopsis || 'No synopsis available.'}
+                                    ${escapeHtml(m.synopsis || 'No synopsis available.')}
                                 </p>
                             </div>
 
                             <div class="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between text-xs">
-                                <span class="text-stone-500 font-serif text-[11px]">${m.language}</span>
-                                <button onclick="openReviewsModal(${m.movie_id}, '${m.title.replace(/'/g, "\\'")}')" class="text-stone-900 hover:text-[#c4122f] font-semibold flex items-center gap-1 transition">
+                                <div class="flex items-center gap-2">
+                                    <button onclick="openEditMovieModal(${m.movie_id})" title="Edit film" class="text-stone-400 hover:text-stone-900 transition">
+                                        <i class="fa-regular fa-pen-to-square"></i>
+                                    </button>
+                                    <button onclick="deleteMovie(${m.movie_id}, '${escapeHtml(m.title).replace(/'/g, "\\'")}')" title="Delete film" class="text-stone-400 hover:text-[#c4122f] transition">
+                                        <i class="fa-regular fa-trash-can"></i>
+                                    </button>
+                                </div>
+                                <button onclick="openReviewsModal(${m.movie_id}, '${escapeHtml(m.title).replace(/'/g, "\\'")}', '${escapeHtml(poster)}')" class="text-stone-900 hover:text-[#c4122f] font-semibold flex items-center gap-1 transition">
                                     <span>${m.total_reviews} Reviews</span>
                                     <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                 </button>
@@ -1121,172 +927,161 @@
 
         function populateMovieSelects(movies) {
             const reviewSelect = document.getElementById('input-movie');
-            const screeningSelect = document.getElementById('screening-input-movie');
-            const prequelSelect = document.getElementById('movie-input-prequel');
-            
-            const options = movies.map(m => `<option value="${m.movie_id}">${m.title} (${m.release_year})</option>`).join('');
+            const prequelAdd = document.getElementById('movie-input-prequel');
+            const prequelEdit = document.getElementById('edit-movie-prequel');
+
+            const options = movies.map(m => `<option value="${m.movie_id}">${escapeHtml(m.title)} (${m.release_year})</option>`).join('');
+            const prequelOptions = '<option value="">None (Standalone Film)</option>' +
+                movies.map(m => `<option value="${m.movie_id}">Sequel to: ${escapeHtml(m.title)} (${m.release_year})</option>`).join('');
+
             if (reviewSelect) reviewSelect.innerHTML = options;
-            if (screeningSelect) screeningSelect.innerHTML = options;
-            if (prequelSelect) {
-                prequelSelect.innerHTML = '<option value="">None (Standalone Film)</option>' + 
-                    movies.map(m => `<option value="${m.movie_id}">Sequel to: ${m.title} (${m.release_year})</option>`).join('');
-            }
+            if (prequelAdd) prequelAdd.innerHTML = prequelOptions;
+            if (prequelEdit) prequelEdit.innerHTML = prequelOptions;
         }
 
-        // API 2: Fetch and Render Festivals & Awards
-        async function fetchFestivals() {
-            try {
-                const res = await fetch('/api/festivals');
-                const data = await res.json();
-                if (data.success) {
-                    // Render Festivals Overview
-                    const festGrid = document.getElementById('festivals-grid');
-                    festGrid.innerHTML = data.festivals.map(f => `
-                        <div class="editorial-card p-5 border-t-2 border-t-stone-900">
-                            <span class="editorial-kicker">Est. ${f.established_year}</span>
-                            <h4 class="text-lg font-bold text-stone-950 serif-title mt-0.5">${f.festival_name}</h4>
-                            <p class="text-xs text-stone-500 font-serif mt-1"><i class="fa-solid fa-location-dot mr-1"></i>${f.city}</p>
-                            <div class="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between text-xs text-stone-600">
-                                <span>${f.total_awards_catalogued} Official Awards</span>
-                                <span>${f.total_nominations} Laurels</span>
-                            </div>
-                        </div>
-                    `).join('');
-
-                    // Render Awards Table
-                    const awardsTbody = document.getElementById('awards-table-body');
-                    awardsTbody.innerHTML = data.awards.map(a => `
-                        <tr class="hover:bg-stone-50 transition">
-                            <td class="px-5 py-3 font-semibold text-stone-900">${a.festival_name} <br><span class="text-xs font-normal text-stone-500">${a.city}</span></td>
-                            <td class="px-5 py-3 font-serif font-bold text-stone-900">${a.category_name}</td>
-                            <td class="px-5 py-3 font-semibold text-stone-900">${a.movie_title}</td>
-                            <td class="px-5 py-3 text-stone-700 font-serif">${a.nominee_name || '—'}</td>
-                            <td class="px-5 py-3 font-mono text-xs text-stone-600">${a.award_year}</td>
-                            <td class="px-5 py-3">
-                                ${a.is_winner ? `
-                                    <span class="text-[#c4122f] text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-                                        <i class="fa-solid fa-trophy text-[11px]"></i> Winner
-                                    </span>
-                                ` : `
-                                    <span class="text-stone-400 text-xs font-medium uppercase">Nominee</span>
-                                `}
-                            </td>
-                        </tr>
-                    `).join('');
-
-                    // Render Curators Roster
-                    const curGrid = document.getElementById('curators-grid');
-                    curGrid.innerHTML = data.curators.map(c => `
-                        <div class="editorial-card p-5 flex items-start gap-3">
-                            <div class="w-8 h-8 bg-stone-900 text-white flex items-center justify-center font-bold text-xs">
-                                <i class="fa-solid fa-user-check"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h5 class="text-sm font-bold text-stone-900">${c.username}</h5>
-                                <p class="text-xs text-stone-600 font-serif mt-0.5">${c.festival_organization}</p>
-                                <div class="mt-2 text-[11px] font-mono text-stone-500">
-                                    Accreditation: <span class="text-stone-800">${c.accreditation_id}</span> • Email: ${c.email}
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (err) {
-                console.error('Failed to load festivals:', err);
-            }
+        function toggleAddMoviePanel() {
+            document.getElementById('add-movie-panel').classList.toggle('hidden');
         }
 
-        // API 3: Theatrical Screenings
-        async function fetchTheaters() {
-            try {
-                const res = await fetch('/api/theaters');
-                const data = await res.json();
-                if (data.success) {
-                    cachedTheaters = data.data;
-                    const select = document.getElementById('screening-input-room');
-                    if (select) {
-                        select.innerHTML = data.data.map(t => 
-                            `<option value="${t.theater_id}_${t.room_number}">${t.theater_name} (Room ${t.room_number} - ${t.screen_format})</option>`
-                        ).join('');
-                    }
-                }
-            } catch (err) {
-                console.error('Failed to load theaters:', err);
-            }
-        }
-
-        async function fetchScreenings() {
-            try {
-                const res = await fetch('/api/screenings');
-                const data = await res.json();
-                if (data.success) {
-                    const tbody = document.getElementById('screenings-table-body');
-                    tbody.innerHTML = data.data.map(s => `
-                        <tr class="hover:bg-stone-50 transition">
-                            <td class="px-5 py-3 font-semibold text-stone-900">${s.theater_name} <br><span class="text-xs font-normal text-stone-500">${s.city}</span></td>
-                            <td class="px-5 py-3">Room ${s.room_number} <span class="ml-1 text-[10px] uppercase font-mono text-stone-600">${s.screen_format}</span><br><span class="text-xs text-stone-500">${s.seating_capacity} seats</span></td>
-                            <td class="px-5 py-3 font-semibold text-stone-900">${s.movie_title}<br><span class="text-xs font-serif text-stone-500">Dir. ${s.director_name}</span></td>
-                            <td class="px-5 py-3 font-mono text-xs text-stone-700">${new Date(s.screening_datetime).toLocaleString('en-US')}</td>
-                            <td class="px-5 py-3 font-bold text-stone-900">HK$${parseFloat(s.ticket_price).toFixed(2)}</td>
-                            <td class="px-5 py-3 font-mono text-stone-700 font-medium">HK$${parseFloat(s.potential_gross).toFixed(2)}</td>
-                        </tr>
-                    `).join('');
-                }
-            } catch (err) {
-                console.error('Failed to load screenings:', err);
-            }
-        }
-
-        async function submitScreening(event) {
+        async function submitNewMovie(event) {
             event.preventDefault();
-            const statusDiv = document.getElementById('screening-status');
-            const roomVal = document.getElementById('screening-input-room').value.split('_');
+            const statusDiv = document.getElementById('add-movie-status');
             const payload = {
-                theater_id: parseInt(roomVal[0]),
-                room_number: parseInt(roomVal[1]),
-                movie_id: parseInt(document.getElementById('screening-input-movie').value),
-                screening_datetime: document.getElementById('screening-input-time').value.replace('T', ' ') + ':00',
-                ticket_price: parseFloat(document.getElementById('screening-input-price').value)
+                title: document.getElementById('movie-input-title').value,
+                release_year: document.getElementById('movie-input-year').value,
+                duration_minutes: document.getElementById('movie-input-duration').value,
+                director_name: document.getElementById('movie-input-director').value,
+                genre_name: document.getElementById('movie-input-genre').value,
+                language: document.getElementById('movie-input-language').value,
+                prequel_movie_id: document.getElementById('movie-input-prequel').value || null,
+                poster_url: document.getElementById('movie-input-poster').value || null,
+                synopsis: document.getElementById('movie-input-synopsis').value || null
             };
 
-            statusDiv.className = 'mt-3 p-2 bg-stone-100 text-stone-700 block';
-            statusDiv.innerText = 'Updating schedule...';
+            statusDiv.className = 'p-3 bg-stone-100 text-stone-700 block';
+            statusDiv.innerText = 'Saving...';
 
             try {
-                const res = await fetch('/api/screenings', {
+                const res = await fetch('/api/movies', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 if (data.success) {
-                    statusDiv.className = 'mt-3 p-2 bg-emerald-50 text-emerald-800 block';
+                    statusDiv.className = 'p-3 bg-emerald-50 text-emerald-800 block';
                     statusDiv.innerText = 'Success';
-                    fetchScreenings();
+                    document.getElementById('add-movie-form').reset();
+                    await fetchMovies();
+                    setTimeout(() => {
+                        toggleAddMoviePanel();
+                        statusDiv.className = 'hidden';
+                    }, 800);
                 } else {
-                    statusDiv.className = 'mt-3 p-2 bg-rose-50 text-[#c4122f] block';
+                    statusDiv.className = 'p-3 bg-rose-50 text-[#c4122f] block';
                     statusDiv.innerText = 'Error: ' + data.error;
                 }
             } catch (err) {
-                statusDiv.className = 'mt-3 p-2 bg-rose-50 text-[#c4122f] block';
+                statusDiv.className = 'p-3 bg-rose-50 text-[#c4122f] block';
                 statusDiv.innerText = 'Error: ' + err.message;
             }
         }
 
-        // Reviews Modal Dialog
-        async function openReviewsModal(movieId, movieTitle) {
+        function openEditMovieModal(movieId) {
+            const movie = cachedMovies.find(m => m.movie_id === movieId);
+            if (!movie) return;
+
+            document.getElementById('edit-movie-id').value = movie.movie_id;
+            document.getElementById('edit-movie-title').value = movie.title || '';
+            document.getElementById('edit-movie-year').value = movie.release_year || '';
+            document.getElementById('edit-movie-duration').value = movie.duration_minutes || '';
+            document.getElementById('edit-movie-director').value = movie.director_name || '';
+            document.getElementById('edit-movie-genre').value = movie.genres ? movie.genres.split(',')[0].trim() : '';
+            document.getElementById('edit-movie-language').value = movie.language || 'English';
+            document.getElementById('edit-movie-prequel').value = movie.prequel_movie_id || '';
+            document.getElementById('edit-movie-poster').value = movie.poster_url || '';
+            document.getElementById('edit-movie-synopsis').value = movie.synopsis || '';
+            document.getElementById('edit-movie-status').className = 'hidden';
+
+            document.getElementById('edit-movie-modal').classList.remove('hidden');
+        }
+
+        function closeEditMovieModal() {
+            document.getElementById('edit-movie-modal').classList.add('hidden');
+        }
+
+        async function submitEditMovie(event) {
+            event.preventDefault();
+            const movieId = document.getElementById('edit-movie-id').value;
+            const statusDiv = document.getElementById('edit-movie-status');
+
+            const payload = {
+                title: document.getElementById('edit-movie-title').value,
+                release_year: document.getElementById('edit-movie-year').value,
+                duration_minutes: document.getElementById('edit-movie-duration').value,
+                director_name: document.getElementById('edit-movie-director').value,
+                genre_name: document.getElementById('edit-movie-genre').value,
+                language: document.getElementById('edit-movie-language').value,
+                prequel_movie_id: document.getElementById('edit-movie-prequel').value || null,
+                poster_url: document.getElementById('edit-movie-poster').value || null,
+                synopsis: document.getElementById('edit-movie-synopsis').value || null
+            };
+
+            statusDiv.className = 'p-2.5 bg-stone-100 text-stone-700 block';
+            statusDiv.innerText = 'Updating...';
+
+            try {
+                const res = await fetch(`/api/movies/${movieId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    statusDiv.className = 'p-2.5 bg-emerald-50 text-emerald-800 block';
+                    statusDiv.innerText = 'Success';
+                    await fetchMovies();
+                    setTimeout(closeEditMovieModal, 600);
+                } else {
+                    statusDiv.className = 'p-2.5 bg-rose-50 text-[#c4122f] block';
+                    statusDiv.innerText = 'Error: ' + data.error;
+                }
+            } catch (err) {
+                statusDiv.className = 'p-2.5 bg-rose-50 text-[#c4122f] block';
+                statusDiv.innerText = 'Error: ' + err.message;
+            }
+        }
+
+        async function deleteMovie(movieId, title) {
+            if (!confirm(`Delete "${title}" from the archive? All associated reviews and genres will also be removed.`)) return;
+            try {
+                const res = await fetch(`/api/movies/${movieId}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    await fetchMovies();
+                    fetchAllReviews();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        // ============================================================
+        // REVIEWS CRUD (READ, CREATE, UPDATE, DELETE)
+        // ============================================================
+        async function openReviewsModal(movieId, movieTitle, posterSrc) {
+            currentModalMovie = { movieId, movieTitle, posterSrc };
             const modal = document.getElementById('reviews-modal');
             const titleEl = document.getElementById('modal-movie-title');
-            const listEl = document.getElementById('modal-reviews-list');
             const posterEl = document.getElementById('modal-movie-poster');
+            const listEl = document.getElementById('modal-reviews-list');
 
-            titleEl.innerText = `${movieTitle} — Community Critique`;
-            if (posterEl) {
-                const posterSrc = moviePosters[movieId] || defaultPoster;
-                posterEl.src = posterSrc;
-                posterEl.classList.remove('hidden');
-            }
-            listEl.innerHTML = '<div class="text-stone-500 text-xs py-4 font-serif">Loading reviews from database...</div>';
+            titleEl.innerText = `${movieTitle} — Reviews`;
+            posterEl.src = posterSrc || defaultPoster;
+            posterEl.classList.remove('hidden');
+            listEl.innerHTML = '<div class="text-stone-500 text-xs py-4 font-serif">Loading reviews...</div>';
             modal.classList.remove('hidden');
 
             try {
@@ -1294,30 +1089,10 @@
                 const data = await res.json();
                 if (data.success) {
                     if (data.data.length === 0) {
-                        listEl.innerHTML = '<div class="text-stone-500 text-xs py-6 text-center font-serif">No reviews cataloged for this film yet.</div>';
+                        listEl.innerHTML = '<div class="text-stone-500 text-xs py-6 text-center font-serif">No reviews catalogued for this film yet.</div>';
                         return;
                     }
-
-                    listEl.innerHTML = data.data.map(r => `
-                        <div class="p-4 border-b border-stone-200 bg-white">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center gap-2">
-                                    <strong class="text-stone-900 text-xs uppercase tracking-wider">${r.username}</strong>
-                                    ${r.publication_name ? `<span class="text-[10px] text-stone-500 font-serif italic">(${r.publication_name})</span>` : ''}
-                                </div>
-                                <div class="text-[#c4122f] text-xs font-bold font-serif">
-                                    ${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)} (${r.rating}/5)
-                                </div>
-                            </div>
-                            <p class="text-xs text-stone-800 font-serif leading-relaxed ${r.contains_spoilers ? 'italic text-stone-500' : ''}">
-                                ${r.contains_spoilers ? '<span class="text-[#c4122f] font-sans font-bold not-italic">[Spoiler Warning] </span>' : ''}
-                                ${r.review_text || 'No written critique provided.'}
-                            </p>
-                            <div class="mt-2 text-[10px] text-stone-400 font-mono">
-                                Date watched: ${new Date(r.watch_date).toLocaleDateString('en-US')}
-                            </div>
-                        </div>
-                    `).join('');
+                    listEl.innerHTML = data.data.map(r => renderReviewCardHtml(r, false)).join('');
                 }
             } catch (err) {
                 listEl.innerHTML = '<div class="text-[#c4122f] text-xs py-4">Failed to load reviews.</div>';
@@ -1326,75 +1101,86 @@
 
         function closeReviewsModal() {
             document.getElementById('reviews-modal').classList.add('hidden');
+            currentModalMovie = null;
         }
 
-        // API 4: Completionist Challenge (Relational Division)
-        async function fetchDivision() {
+        async function fetchAllReviews() {
+            const feed = document.getElementById('all-reviews-feed');
+            const countEl = document.getElementById('all-reviews-count');
             try {
-                const res = await fetch('/api/division/nolan');
+                const res = await fetch('/api/reviews');
                 const data = await res.json();
                 if (data.success) {
-                    document.getElementById('nolan-count-badge').innerText = `${data.total_nolan_movies} Films Required`;
-                    
-                    const moviesList = document.getElementById('nolan-movies-list');
-                    moviesList.innerHTML = data.nolan_movies.map(m => `
-                        <li class="py-2.5 flex items-center justify-between text-xs">
-                            <span class="text-stone-900 font-serif font-medium">${m.title}</span>
-                            <span class="text-stone-400 font-mono text-[11px]">${m.release_year}</span>
-                        </li>
-                    `).join('');
+                    countEl.innerText = `${data.count} Published Reviews`;
+                    if (data.data.length === 0) {
+                        feed.innerHTML = '<div class="editorial-card p-6 text-xs text-stone-500 font-serif text-center">No reviews published yet.</div>';
+                        return;
+                    }
+                    feed.innerHTML = data.data.map(r => renderReviewCardHtml(r, true)).join('');
+                }
+            } catch (err) {
+                feed.innerHTML = '<div class="text-[#c4122f] text-xs">Failed to load reviews.</div>';
+            }
+        }
 
-                    const winnersContainer = document.getElementById('division-winners-container');
-                    winnersContainer.innerHTML = data.division_winners.map(w => `
-                        <div class="p-3.5 border-b border-stone-200 flex items-center justify-between">
-                            <div>
-                                <h4 class="font-bold text-stone-900 text-xs uppercase tracking-wider">${w.username}</h4>
-                                <p class="text-[11px] text-stone-500 font-serif">${w.email} • Tier: <span class="font-medium text-stone-800">${w.membership_tier}</span></p>
+        function renderReviewCardHtml(r, showMovieTitle) {
+            const badge = r.role === 'CRITIC'
+                ? (r.publication_name || 'Film Critic')
+                : `${r.membership_tier || 'Member'} Cinephile`;
+            const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+            const safeText = escapeHtml(r.review_text || '').replace(/\n/g, ' ');
+            const movieLabel = showMovieTitle ? escapeHtml(r.movie_title) : (currentModalMovie ? escapeHtml(currentModalMovie.movieTitle) : '');
+
+            return `
+                <div class="editorial-card p-4 bg-white">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            ${showMovieTitle ? `
+                                <span class="editorial-kicker text-[10px]">${escapeHtml(r.movie_title)} (${r.release_year})</span>
+                            ` : ''}
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <strong class="text-stone-900 text-xs uppercase tracking-wider">${escapeHtml(r.username)}</strong>
+                                <span class="text-[11px] text-stone-500 font-serif italic">(${escapeHtml(badge)})</span>
                             </div>
-                            <span class="text-xs font-bold text-[#c4122f] uppercase tracking-wider">
-                                ✓ 5/5 Completed
-                            </span>
                         </div>
-                    `).join('');
-                }
-            } catch (err) {
-                console.error('Failed to load division query:', err);
-            }
+                        <div class="text-[#c4122f] text-xs font-bold font-serif whitespace-nowrap">
+                            ${stars} (${r.rating}/5)
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-stone-800 font-serif leading-relaxed mt-2.5 ${r.contains_spoilers ? 'italic text-stone-500' : ''}">
+                        ${r.contains_spoilers ? '<span class="text-[#c4122f] font-sans font-bold not-italic">[Spoiler] </span>' : ''}
+                        ${escapeHtml(r.review_text || 'No written critique provided.')}
+                    </p>
+
+                    <div class="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between text-[11px]">
+                        <span class="text-stone-400 font-mono">Watched ${new Date(r.watch_date).toLocaleDateString('en-US')}</span>
+                        <div class="flex items-center gap-3">
+                            <button
+                                onclick="openEditReviewModal(${r.review_id}, '${movieLabel.replace(/'/g, "\\'")}', ${r.rating}, '${safeText.replace(/'/g, "\\'")}', ${r.contains_spoilers ? 'true' : 'false'})"
+                                class="text-stone-600 hover:text-stone-950 font-semibold uppercase tracking-wider text-[10px] flex items-center gap-1 transition"
+                            >
+                                <i class="fa-regular fa-pen-to-square"></i> Edit
+                            </button>
+                            <button
+                                onclick="deleteReview(${r.review_id})"
+                                class="text-stone-500 hover:text-[#c4122f] font-semibold uppercase tracking-wider text-[10px] flex items-center gap-1 transition"
+                            >
+                                <i class="fa-regular fa-trash-can"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
-        // API 5: Directors Leaderboard
-        async function fetchDirectors() {
-            try {
-                const res = await fetch('/api/directors');
-                const data = await res.json();
-                if (data.success) {
-                    const tbody = document.getElementById('directors-table-body');
-                    tbody.innerHTML = data.data.map(d => `
-                        <tr class="hover:bg-stone-50 transition">
-                            <td class="px-5 py-3 font-bold text-stone-900">${d.director_name}</td>
-                            <td class="px-5 py-3 text-stone-600 text-xs font-serif">${d.nationality}</td>
-                            <td class="px-5 py-3 font-mono text-xs">${d.total_films_directed}</td>
-                            <td class="px-5 py-3 font-mono text-xs">${d.total_reviews}</td>
-                            <td class="px-5 py-3 font-serif font-bold text-[#c4122f] text-sm">
-                                ★ ${d.average_rating > 5 ? (d.average_rating / 2).toFixed(2) : d.average_rating}
-                            </td>
-                            <td class="px-5 py-3 text-stone-700 text-xs font-serif">${d.awards_won} Awards</td>
-                        </tr>
-                    `).join('');
-                }
-            } catch (err) {
-                console.error('Failed to load directors:', err);
-            }
-        }
-
-        // API 6: Submit Review (Outputs "Success")
         async function submitReview(event) {
             event.preventDefault();
             const statusDiv = document.getElementById('review-status');
             const payload = {
-                user_id: parseInt(document.getElementById('input-user').value),
-                movie_id: parseInt(document.getElementById('input-movie').value),
-                rating: parseInt(document.getElementById('input-rating').value),
+                user_id: parseInt(document.getElementById('input-user').value, 10),
+                movie_id: parseInt(document.getElementById('input-movie').value, 10),
+                rating: parseInt(document.getElementById('input-rating').value, 10),
                 review_text: document.getElementById('input-text').value,
                 contains_spoilers: document.getElementById('input-spoilers').checked
             };
@@ -1411,13 +1197,13 @@
                 const data = await res.json();
                 if (data.success) {
                     statusDiv.className = 'p-3 bg-emerald-50 text-emerald-800 block';
-                    statusDiv.innerText = 'Success'; // Just say success
-                    fetchMovies();
-                    fetchDivision();
-                    fetchDirectors();
+                    statusDiv.innerText = 'Success';
+                    document.getElementById('input-text').value = '';
+                    document.getElementById('input-spoilers').checked = false;
+                    await Promise.all([fetchAllReviews(), fetchMovies(), fetchDirectors(), fetchDivision()]);
                 } else {
                     statusDiv.className = 'p-3 bg-rose-50 text-[#c4122f] block';
-                    statusDiv.innerText = 'Error: ' + data.error;
+                    statusDiv.innerText = data.error;
                 }
             } catch (err) {
                 statusDiv.className = 'p-3 bg-rose-50 text-[#c4122f] block';
@@ -1425,142 +1211,216 @@
             }
         }
 
-        // API 7: Fetch and Render Film Talent & Accolades
-        async function fetchProfessionals() {
+        function openEditReviewModal(reviewId, movieTitle, rating, reviewText, containsSpoilers) {
+            document.getElementById('edit-review-id').value = reviewId;
+            document.getElementById('edit-review-heading').innerText = movieTitle ? `Edit Review — ${movieTitle}` : 'Edit Review';
+            setEditStarRating(rating);
+            document.getElementById('edit-review-text').value = reviewText;
+            document.getElementById('edit-review-spoilers').checked = !!containsSpoilers;
+            document.getElementById('edit-review-status').className = 'hidden';
+            document.getElementById('edit-review-modal').classList.remove('hidden');
+        }
+
+        function closeEditReviewModal() {
+            document.getElementById('edit-review-modal').classList.add('hidden');
+        }
+
+        async function submitEditReview(event) {
+            event.preventDefault();
+            const reviewId = document.getElementById('edit-review-id').value;
+            const statusDiv = document.getElementById('edit-review-status');
+            const payload = {
+                rating: parseInt(document.getElementById('edit-review-rating').value, 10),
+                review_text: document.getElementById('edit-review-text').value,
+                contains_spoilers: document.getElementById('edit-review-spoilers').checked
+            };
+
+            statusDiv.className = 'p-2.5 bg-stone-100 text-stone-700 block';
+            statusDiv.innerText = 'Updating...';
+
             try {
-                const res = await fetch('/api/professionals');
+                const res = await fetch(`/api/reviews/${reviewId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
                 const data = await res.json();
                 if (data.success) {
-                    // 1. Render Official Individual Honors Register
-                    const awardsCountEl = document.getElementById('awards-people-count');
-                    if (awardsCountEl) {
-                        awardsCountEl.innerText = `${data.awards.length} Recorded Laurels & Honors`;
+                    statusDiv.className = 'p-2.5 bg-emerald-50 text-emerald-800 block';
+                    statusDiv.innerText = 'Success';
+                    await Promise.all([fetchAllReviews(), fetchMovies(), fetchDirectors()]);
+                    if (currentModalMovie) {
+                        openReviewsModal(currentModalMovie.movieId, currentModalMovie.movieTitle, currentModalMovie.posterSrc);
                     }
-
-                    const awardsTbody = document.getElementById('awards-people-table-body');
-                    if (awardsTbody) {
-                        awardsTbody.innerHTML = data.awards.map(a => `
-                            <tr class="hover:bg-stone-50 transition">
-                                <td class="px-5 py-3.5 font-bold text-stone-900">${a.person_name}</td>
-                                <td class="px-5 py-3.5 font-serif font-bold text-stone-900">${a.category_name}</td>
-                                <td class="px-5 py-3.5 text-stone-700 font-serif">${a.festival_name} <br><span class="text-xs text-stone-500 font-sans">${a.city}</span></td>
-                                <td class="px-5 py-3.5 text-stone-800 font-medium">${a.movie_title}</td>
-                                <td class="px-5 py-3.5 font-mono text-xs text-stone-600">${a.award_year}</td>
-                                <td class="px-5 py-3.5">
-                                    ${a.is_winner ? `
-                                        <span class="text-[#c4122f] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                                            <i class="fa-solid fa-trophy text-[11px]"></i> Winner
-                                        </span>
-                                    ` : `
-                                        <span class="text-stone-400 text-xs font-medium uppercase tracking-wider">
-                                            Nominee
-                                        </span>
-                                    `}
-                                </td>
-                            </tr>
-                        `).join('');
-                    }
-
-                    // 2. Render Talent Profiles & Filmographies
-                    const grid = document.getElementById('professionals-grid');
-                    if (grid) {
-                        // Group awards by person
-                        const awardsByPerson = {};
-                        data.awards.forEach(a => {
-                            if (!awardsByPerson[a.person_id]) awardsByPerson[a.person_id] = [];
-                            awardsByPerson[a.person_id].push(a);
-                        });
-
-                        grid.innerHTML = data.data.map(p => {
-                            const personAwards = awardsByPerson[p.person_id] || [];
-                            return `
-                                <div class="editorial-card p-6 flex flex-col justify-between">
-                                    <div>
-                                        <div class="flex items-start justify-between">
-                                            <div>
-                                                <span class="editorial-kicker text-[10px]">${p.roles}</span>
-                                                <h4 class="text-xl font-bold text-stone-950 serif-title mt-0.5">${p.name}</h4>
-                                                <p class="text-xs text-stone-500 font-serif mt-0.5">${p.nationality}</p>
-                                            </div>
-                                            <div class="text-right">
-                                                <span class="text-xs font-mono font-bold text-[#c4122f] bg-rose-50 px-2 py-0.5 border border-rose-200">
-                                                    ${p.total_awards_won} Awards
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <p class="text-xs text-stone-700 font-serif mt-3 leading-relaxed">
-                                            ${p.biography || 'Distinguished artist in the cinematic medium.'}
-                                        </p>
-
-                                        <div class="mt-4 pt-3 border-t border-stone-200">
-                                            <span class="text-[10px] font-bold text-stone-500 uppercase tracking-widest block mb-1">Catalogued Works</span>
-                                            <p class="text-xs text-stone-800 font-serif">
-                                                ${p.filmography}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-4 pt-3 border-t border-stone-200">
-                                        <span class="text-[10px] font-bold text-stone-500 uppercase tracking-widest block mb-1.5">Festival Accolades</span>
-                                        ${personAwards.length > 0 ? `
-                                            <ul class="space-y-1">
-                                                ${personAwards.map(aw => `
-                                                    <li class="text-xs flex items-center justify-between font-serif">
-                                                        <span class="text-stone-900 font-medium">
-                                                            ${aw.is_winner ? '<i class="fa-solid fa-trophy text-[#c4122f] text-[10px] mr-1"></i>' : '• '}
-                                                            ${aw.category_name} (${aw.award_year})
-                                                        </span>
-                                                        <span class="text-[11px] text-stone-500">${aw.is_winner ? 'Winner' : 'Nominee'}</span>
-                                                    </li>
-                                                `).join('')}
-                                            </ul>
-                                        ` : `
-                                            <p class="text-xs text-stone-400 font-serif italic">No major festival awards catalogued yet.</p>
-                                        `}
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
-                    }
+                    setTimeout(closeEditReviewModal, 500);
+                } else {
+                    statusDiv.className = 'p-2.5 bg-rose-50 text-[#c4122f] block';
+                    statusDiv.innerText = 'Error: ' + data.error;
                 }
             } catch (err) {
-                console.error('Failed to load professionals:', err);
+                statusDiv.className = 'p-2.5 bg-rose-50 text-[#c4122f] block';
+                statusDiv.innerText = 'Error: ' + err.message;
             }
         }
 
-        // Tab Switching
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
-            document.querySelectorAll('.nav-item').forEach(btn => {
-                btn.classList.remove('bg-stone-100', 'text-stone-950', 'border-[#c4122f]');
-                btn.classList.add('text-stone-700', 'border-transparent');
-            });
-
-            const targetSection = document.getElementById(`section-${tabId}`);
-            if (targetSection) targetSection.classList.remove('hidden');
-
-            const activeBtn = document.getElementById(`tab-${tabId}`);
-            if (activeBtn) {
-                activeBtn.classList.add('bg-stone-100', 'text-stone-950', 'border-[#c4122f]');
-                activeBtn.classList.remove('text-stone-700', 'border-transparent');
+        async function deleteReview(reviewId) {
+            if (!confirm('Delete this review permanently?')) return;
+            try {
+                const res = await fetch(`/api/reviews/${reviewId}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    await Promise.all([fetchAllReviews(), fetchMovies(), fetchDirectors(), fetchDivision()]);
+                    if (currentModalMovie) {
+                        openReviewsModal(currentModalMovie.movieId, currentModalMovie.movieTitle, currentModalMovie.posterSrc);
+                    }
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
             }
+        }
 
-            closeSidebar();
+        // ============================================================
+        // USERS (READ & CREATE ACCOUNT)
+        // ============================================================
+        function openCreateAccountModal() {
+            document.getElementById('create-account-modal').classList.remove('hidden');
+        }
+        function closeCreateAccountModal() {
+            document.getElementById('create-account-modal').classList.add('hidden');
+            document.getElementById('acc-status').className = 'hidden';
+        }
+        function toggleAccountRoleFields() {
+            const role = document.getElementById('acc-input-role').value;
+            document.getElementById('acc-cinephile-fields').classList.toggle('hidden', role === 'CRITIC');
+            document.getElementById('acc-critic-fields').classList.toggle('hidden', role !== 'CRITIC');
+        }
 
-            if (tabId === 'festivals') fetchFestivals();
-            if (tabId === 'people') fetchProfessionals();
-            if (tabId === 'screenings') {
-                fetchScreenings();
-                fetchTheaters();
+        async function fetchUsers(selectUserId = null) {
+            try {
+                const res = await fetch('/api/users');
+                const data = await res.json();
+                if (data.success) {
+                    const select = document.getElementById('input-user');
+                    if (select) {
+                        select.innerHTML = data.data.map(u => {
+                            const desc = u.role === 'CRITIC'
+                                ? `Film Critic, ${u.publication_name || 'Independent'}`
+                                : `${u.membership_tier || 'Member'} Cinephile`;
+                            return `<option value="${u.user_id}">${escapeHtml(u.username)} (${escapeHtml(desc)})</option>`;
+                        }).join('');
+                        if (selectUserId) select.value = selectUserId;
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load users:', err);
             }
-            if (tabId === 'division') fetchDivision();
-            if (tabId === 'directors') fetchDirectors();
+        }
+
+        async function submitNewAccount(event) {
+            event.preventDefault();
+            const statusDiv = document.getElementById('acc-status');
+            const payload = {
+                username: document.getElementById('acc-input-username').value,
+                email: document.getElementById('acc-input-email').value,
+                role: document.getElementById('acc-input-role').value,
+                membership_tier: document.getElementById('acc-input-tier').value,
+                publication_name: document.getElementById('acc-input-publication').value
+            };
+
+            statusDiv.className = 'p-2.5 bg-stone-100 text-stone-700 block';
+            statusDiv.innerText = 'Creating account...';
+
+            try {
+                const res = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    statusDiv.className = 'p-2.5 bg-emerald-50 text-emerald-800 block';
+                    statusDiv.innerText = 'Success';
+                    await fetchUsers(data.user.user_id);
+                    document.getElementById('create-account-form').reset();
+                    toggleAccountRoleFields();
+                    setTimeout(closeCreateAccountModal, 700);
+                } else {
+                    statusDiv.className = 'p-2.5 bg-rose-50 text-[#c4122f] block';
+                    statusDiv.innerText = 'Error: ' + data.error;
+                }
+            } catch (err) {
+                statusDiv.className = 'p-2.5 bg-rose-50 text-[#c4122f] block';
+                statusDiv.innerText = 'Error: ' + err.message;
+            }
+        }
+
+        // ============================================================
+        // ANALYTICS: DIRECTOR LEADERBOARD & COMPLETIONIST CHALLENGE
+        // ============================================================
+        async function fetchDirectors() {
+            try {
+                const res = await fetch('/api/directors');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('directors-table-body').innerHTML = data.data.map(d => `
+                        <tr class="hover:bg-stone-50 transition">
+                            <td class="px-5 py-3.5 font-bold text-stone-900">${escapeHtml(d.director_name)}</td>
+                            <td class="px-5 py-3.5 text-stone-600 text-xs font-serif">${escapeHtml(d.nationality)}</td>
+                            <td class="px-5 py-3.5 font-mono text-xs">${d.total_films_directed}</td>
+                            <td class="px-5 py-3.5 font-mono text-xs">${d.total_reviews}</td>
+                            <td class="px-5 py-3.5 font-serif font-bold text-[#c4122f] text-sm">★ ${d.average_rating}</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Failed to load directors:', err);
+            }
+        }
+
+        async function fetchDivision() {
+            try {
+                const res = await fetch('/api/division/nolan');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('nolan-count-badge').innerText = `${data.total_nolan_movies} Films Required`;
+                    document.getElementById('nolan-movies-list').innerHTML = data.nolan_movies.map(m => `
+                        <li class="py-2.5 flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-3">
+                                <img src="${escapeHtml(m.poster_url || defaultPoster)}" onerror="this.onerror=null; this.src='${defaultPoster}';" class="w-7 aspect-[2/3] object-cover border border-stone-200" />
+                                <span class="text-stone-900 font-serif font-medium">${escapeHtml(m.title)}</span>
+                            </div>
+                            <span class="text-stone-400 font-mono text-[11px]">${m.release_year}</span>
+                        </li>
+                    `).join('');
+
+                    const winnersEl = document.getElementById('division-winners-container');
+                    if (data.division_winners.length === 0) {
+                        winnersEl.innerHTML = '<div class="py-6 text-xs text-stone-500 font-serif text-center">No reviewer has completed all Nolan films yet.</div>';
+                    } else {
+                        winnersEl.innerHTML = data.division_winners.map(w => `
+                            <div class="py-3.5 flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-bold text-stone-900 text-xs uppercase tracking-wider">${escapeHtml(w.username)}</h4>
+                                    <p class="text-[11px] text-stone-500 font-serif">
+                                        ${escapeHtml(w.email)} • ${escapeHtml(w.role === 'CRITIC' ? (w.publication_name || 'Critic') : (w.membership_tier + ' Cinephile'))}
+                                    </p>
+                                </div>
+                                <span class="text-xs font-bold text-[#c4122f] uppercase tracking-wider">
+                                    ✓ ${data.total_nolan_movies}/${data.total_nolan_movies}
+                                </span>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to load division challenge:', err);
+            }
         }
 
         // Initial Load
         fetchMovies();
-        fetchTheaters();
         fetchUsers();
     </script>
 </body>

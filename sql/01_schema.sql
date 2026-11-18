@@ -1,96 +1,53 @@
 -- ====================================================================
--- HKU COMP3278A — Final Project Database Schema
--- System: FilmCraft (Letterboxd+) Cinema & Festival Curator Platform
--- Engine: MySQL 8.x
+-- FilmCraft: Core Relational Database Schema (MySQL 8.x)
+-- HKU COMP3278A — Introduction to Database Management Systems
+-- 6 Normalized (BCNF) Core Tables:
+--   1. users
+--   2. movies
+--   3. movie_genres
+--   4. film_professionals
+--   5. movie_cast_crew
+--   6. reviews
 -- ====================================================================
 
-CREATE DATABASE IF NOT EXISTS `filmcraft`
+DROP DATABASE IF EXISTS `filmcraft`;
+CREATE DATABASE `filmcraft`
   DEFAULT CHARACTER SET utf8mb4
   DEFAULT COLLATE utf8mb4_unicode_ci;
 
 USE `filmcraft`;
 
--- --------------------------------------------------------------------
--- 1. Users & Specialization Hierarchy (ISA)
--- --------------------------------------------------------------------
-DROP TABLE IF EXISTS `award_nominations`;
-DROP TABLE IF EXISTS `festival_awards`;
-DROP TABLE IF EXISTS `festivals`;
-DROP TABLE IF EXISTS `watchlist_entries`;
-DROP TABLE IF EXISTS `watchlists`;
+-- Clean teardown in reverse dependency order
 DROP TABLE IF EXISTS `reviews`;
-DROP TABLE IF EXISTS `theater_screenings`;
-DROP TABLE IF EXISTS `theater_rooms`;
-DROP TABLE IF EXISTS `theaters`;
 DROP TABLE IF EXISTS `movie_cast_crew`;
 DROP TABLE IF EXISTS `film_professionals`;
 DROP TABLE IF EXISTS `movie_genres`;
 DROP TABLE IF EXISTS `movies`;
-DROP TABLE IF EXISTS `festival_curators`;
-DROP TABLE IF EXISTS `film_critics`;
-DROP TABLE IF EXISTS `cinephiles`;
 DROP TABLE IF EXISTS `users`;
 
+-- --------------------------------------------------------------------
+-- 1. Users (Cinephiles & Accredited Film Critics)
+-- Disjoint role-attribute specialization enforced via CHECK constraint
+-- --------------------------------------------------------------------
 CREATE TABLE `users` (
     `user_id` INT AUTO_INCREMENT,
     `username` VARCHAR(50) NOT NULL,
     `email` VARCHAR(100) NOT NULL,
-    `password_hash` VARCHAR(255) NOT NULL,
-    `role` VARCHAR(20) NOT NULL DEFAULT 'CINEPHILE',
+    `role` ENUM('CINEPHILE', 'CRITIC') NOT NULL DEFAULT 'CINEPHILE',
+    `membership_tier` ENUM('FREE', 'PRO', 'PATRON') NULL,
+    `publication_name` VARCHAR(100) NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT `pk_users` PRIMARY KEY (`user_id`),
     CONSTRAINT `uq_users_username` UNIQUE (`username`),
     CONSTRAINT `uq_users_email` UNIQUE (`email`),
-    CONSTRAINT `chk_users_role` CHECK (`role` IN ('CINEPHILE', 'CRITIC', 'CURATOR')),
-    -- Composite unique key required to enforce disjoint ISA specialization via composite FK
-    CONSTRAINT `uq_users_user_role` UNIQUE (`user_id`, `role`)
-) ENGINE=InnoDB;
-
--- Subclass 1: Cinephiles (General audience)
--- Enforces ISA Disjointness & Role Consistency via VARCHAR domain CHECK + composite FK
-CREATE TABLE `cinephiles` (
-    `user_id` INT NOT NULL,
-    `role` VARCHAR(20) NOT NULL DEFAULT 'CINEPHILE',
-    `bio` TEXT,
-    `favorite_genre` VARCHAR(50),
-    `membership_tier` ENUM('FREE', 'PRO', 'PATRON') NOT NULL DEFAULT 'FREE',
-    CONSTRAINT `pk_cinephiles` PRIMARY KEY (`user_id`),
-    CONSTRAINT `chk_cinephiles_role` CHECK (`role` = 'CINEPHILE'),
-    CONSTRAINT `fk_cinephiles_user_role` FOREIGN KEY (`user_id`, `role`)
-        REFERENCES `users` (`user_id`, `role`) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
--- Subclass 2: Film Critics (Accredited reviewers)
--- Enforces ISA Disjointness & Role Consistency via VARCHAR domain CHECK + composite FK
-CREATE TABLE `film_critics` (
-    `user_id` INT NOT NULL,
-    `role` VARCHAR(20) NOT NULL DEFAULT 'CRITIC',
-    `publication_name` VARCHAR(100) NOT NULL,
-    `critic_license_no` VARCHAR(50) NOT NULL,
-    `is_verified` BOOLEAN NOT NULL DEFAULT FALSE,
-    CONSTRAINT `pk_film_critics` PRIMARY KEY (`user_id`),
-    CONSTRAINT `uq_critics_license` UNIQUE (`critic_license_no`),
-    CONSTRAINT `chk_critics_role` CHECK (`role` = 'CRITIC'),
-    CONSTRAINT `fk_film_critics_user_role` FOREIGN KEY (`user_id`, `role`)
-        REFERENCES `users` (`user_id`, `role`) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
--- Subclass 3: Festival Curators (Festival directors & programmers)
--- Enforces ISA Disjointness & Role Consistency via VARCHAR domain CHECK + composite FK
-CREATE TABLE `festival_curators` (
-    `user_id` INT NOT NULL,
-    `role` VARCHAR(20) NOT NULL DEFAULT 'CURATOR',
-    `festival_organization` VARCHAR(120) NOT NULL,
-    `accreditation_id` VARCHAR(50) NOT NULL,
-    CONSTRAINT `pk_festival_curators` PRIMARY KEY (`user_id`),
-    CONSTRAINT `uq_curator_accreditation` UNIQUE (`accreditation_id`),
-    CONSTRAINT `chk_curators_role` CHECK (`role` = 'CURATOR'),
-    CONSTRAINT `fk_curators_user_role` FOREIGN KEY (`user_id`, `role`)
-        REFERENCES `users` (`user_id`, `role`) ON DELETE CASCADE
+    CONSTRAINT `chk_users_role_attrs` CHECK (
+        (`role` = 'CINEPHILE' AND `membership_tier` IS NOT NULL AND `publication_name` IS NULL) OR
+        (`role` = 'CRITIC' AND `publication_name` IS NOT NULL AND `membership_tier` IS NULL)
+    )
 ) ENGINE=InnoDB;
 
 -- --------------------------------------------------------------------
--- 2. Movies, Genres & Franchise Hierarchy
+-- 2. Movies (Self-Referencing Franchise Lineage via prequel_movie_id)
 -- --------------------------------------------------------------------
 CREATE TABLE `movies` (
     `movie_id` INT AUTO_INCREMENT,
@@ -108,7 +65,9 @@ CREATE TABLE `movies` (
         REFERENCES `movies` (`movie_id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
--- Multi-valued attribute table: Movie Genres
+-- --------------------------------------------------------------------
+-- 3. Movie Genres (Multi-Valued Attribute Table in 1NF / BCNF)
+-- --------------------------------------------------------------------
 CREATE TABLE `movie_genres` (
     `movie_id` INT NOT NULL,
     `genre_name` VARCHAR(50) NOT NULL,
@@ -118,24 +77,23 @@ CREATE TABLE `movie_genres` (
 ) ENGINE=InnoDB;
 
 -- --------------------------------------------------------------------
--- 3. Film Professionals & Cast/Crew Relations
+-- 4. Film Professionals (Directors, Actors, Writers, Cinematographers)
 -- --------------------------------------------------------------------
 CREATE TABLE `film_professionals` (
     `person_id` INT AUTO_INCREMENT,
     `name` VARCHAR(100) NOT NULL,
-    `birth_date` DATE,
     `nationality` VARCHAR(50),
     `biography` TEXT,
     CONSTRAINT `pk_film_professionals` PRIMARY KEY (`person_id`)
 ) ENGINE=InnoDB;
 
--- N:M Relationship with descriptive attributes
+-- --------------------------------------------------------------------
+-- 5. Movie Cast & Crew (M:N Relationship with Descriptive Role)
+-- --------------------------------------------------------------------
 CREATE TABLE `movie_cast_crew` (
     `movie_id` INT NOT NULL,
     `person_id` INT NOT NULL,
     `role_type` ENUM('DIRECTOR', 'ACTOR', 'WRITER', 'CINEMATOGRAPHER') NOT NULL,
-    `character_name` VARCHAR(100) NULL,
-    `billing_order` INT NULL,
     CONSTRAINT `pk_movie_cast_crew` PRIMARY KEY (`movie_id`, `person_id`, `role_type`),
     CONSTRAINT `fk_cast_movie` FOREIGN KEY (`movie_id`)
         REFERENCES `movies` (`movie_id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -144,47 +102,7 @@ CREATE TABLE `movie_cast_crew` (
 ) ENGINE=InnoDB;
 
 -- --------------------------------------------------------------------
--- 4. Theaters, Screening Rooms (Weak Entity) & Screenings
--- --------------------------------------------------------------------
-CREATE TABLE `theaters` (
-    `theater_id` INT AUTO_INCREMENT,
-    `name` VARCHAR(100) NOT NULL,
-    `city` VARCHAR(50) NOT NULL,
-    `address` VARCHAR(255) NOT NULL,
-    CONSTRAINT `pk_theaters` PRIMARY KEY (`theater_id`)
-) ENGINE=InnoDB;
-
--- Weak Entity: TheaterRoom (Identified by theater_id + room_number)
-CREATE TABLE `theater_rooms` (
-    `theater_id` INT NOT NULL,
-    `room_number` INT NOT NULL,
-    `seating_capacity` INT NOT NULL,
-    `screen_format` ENUM('STANDARD', 'IMAX', 'DOLBY', '3D') NOT NULL DEFAULT 'STANDARD',
-    CONSTRAINT `pk_theater_rooms` PRIMARY KEY (`theater_id`, `room_number`),
-    CONSTRAINT `chk_seating_capacity` CHECK (`seating_capacity` > 0),
-    CONSTRAINT `fk_rooms_theater` FOREIGN KEY (`theater_id`)
-        REFERENCES `theaters` (`theater_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
-
--- Screening Event Entity
-CREATE TABLE `theater_screenings` (
-    `screening_id` INT AUTO_INCREMENT,
-    `theater_id` INT NOT NULL,
-    `room_number` INT NOT NULL,
-    `movie_id` INT NOT NULL,
-    `screening_datetime` DATETIME NOT NULL,
-    `ticket_price` DECIMAL(6, 2) NOT NULL,
-    CONSTRAINT `pk_theater_screenings` PRIMARY KEY (`screening_id`),
-    CONSTRAINT `uq_room_screening_time` UNIQUE (`theater_id`, `room_number`, `screening_datetime`),
-    CONSTRAINT `chk_ticket_price` CHECK (`ticket_price` >= 0.00),
-    CONSTRAINT `fk_screenings_room` FOREIGN KEY (`theater_id`, `room_number`)
-        REFERENCES `theater_rooms` (`theater_id`, `room_number`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_screenings_movie` FOREIGN KEY (`movie_id`)
-        REFERENCES `movies` (`movie_id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB;
-
--- --------------------------------------------------------------------
--- 5. Reviews & Ratings
+-- 6. Reviews (User M:N Movie with Rating 0-5 Stars & Critique Text)
 -- --------------------------------------------------------------------
 CREATE TABLE `reviews` (
     `review_id` INT AUTO_INCREMENT,
@@ -197,74 +115,9 @@ CREATE TABLE `reviews` (
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT `pk_reviews` PRIMARY KEY (`review_id`),
     CONSTRAINT `uq_user_movie_review` UNIQUE (`user_id`, `movie_id`),
-    CONSTRAINT `chk_rating_range` CHECK (`rating` BETWEEN 0 AND 5),
+    CONSTRAINT `chk_review_rating` CHECK (`rating` BETWEEN 0 AND 5),
     CONSTRAINT `fk_reviews_user` FOREIGN KEY (`user_id`)
         REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_reviews_movie` FOREIGN KEY (`movie_id`)
         REFERENCES `movies` (`movie_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
-
--- --------------------------------------------------------------------
--- 6. Curated Watchlists & Watchlist Entries
--- --------------------------------------------------------------------
-CREATE TABLE `watchlists` (
-    `list_id` INT AUTO_INCREMENT,
-    `user_id` INT NOT NULL,
-    `title` VARCHAR(100) NOT NULL,
-    `description` TEXT,
-    `is_public` BOOLEAN NOT NULL DEFAULT TRUE,
-    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT `pk_watchlists` PRIMARY KEY (`list_id`),
-    CONSTRAINT `fk_watchlists_user` FOREIGN KEY (`user_id`)
-        REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
-
-CREATE TABLE `watchlist_entries` (
-    `list_id` INT NOT NULL,
-    `movie_id` INT NOT NULL,
-    `rank_order` INT NOT NULL,
-    `curator_note` VARCHAR(255),
-    CONSTRAINT `pk_watchlist_entries` PRIMARY KEY (`list_id`, `movie_id`),
-    CONSTRAINT `chk_rank_order` CHECK (`rank_order` > 0),
-    CONSTRAINT `fk_entries_list` FOREIGN KEY (`list_id`)
-        REFERENCES `watchlists` (`list_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_entries_movie` FOREIGN KEY (`movie_id`)
-        REFERENCES `movies` (`movie_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
-
--- --------------------------------------------------------------------
--- 7. Film Festivals, Categories & Award Nominations
--- --------------------------------------------------------------------
-CREATE TABLE `festivals` (
-    `festival_id` INT AUTO_INCREMENT,
-    `name` VARCHAR(100) NOT NULL,
-    `city` VARCHAR(50) NOT NULL,
-    `established_year` INT NOT NULL,
-    CONSTRAINT `pk_festivals` PRIMARY KEY (`festival_id`)
-) ENGINE=InnoDB;
-
-CREATE TABLE `festival_awards` (
-    `award_id` INT AUTO_INCREMENT,
-    `festival_id` INT NOT NULL,
-    `category_name` VARCHAR(80) NOT NULL,
-    `award_year` INT NOT NULL,
-    CONSTRAINT `pk_festival_awards` PRIMARY KEY (`award_id`),
-    CONSTRAINT `uq_festival_category_year` UNIQUE (`festival_id`, `category_name`, `award_year`),
-    CONSTRAINT `fk_awards_festival` FOREIGN KEY (`festival_id`)
-        REFERENCES `festivals` (`festival_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
-
-CREATE TABLE `award_nominations` (
-    `nomination_id` INT AUTO_INCREMENT,
-    `award_id` INT NOT NULL,
-    `movie_id` INT NOT NULL,
-    `person_id` INT NULL,
-    `is_winner` BOOLEAN NOT NULL DEFAULT FALSE,
-    CONSTRAINT `pk_award_nominations` PRIMARY KEY (`nomination_id`),
-    CONSTRAINT `fk_nominations_award` FOREIGN KEY (`award_id`)
-        REFERENCES `festival_awards` (`award_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_nominations_movie` FOREIGN KEY (`movie_id`)
-        REFERENCES `movies` (`movie_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_nominations_person` FOREIGN KEY (`person_id`)
-        REFERENCES `film_professionals` (`person_id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB;

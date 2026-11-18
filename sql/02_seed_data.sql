@@ -1,227 +1,109 @@
 -- ====================================================================
--- HKU COMP3278A — Final Project Realistic Seed Data
--- System: FilmCraft (Letterboxd+) Cinema & Festival Curator Platform
--- Engine: MySQL 8.x
+-- FilmCraft: Initial Seed Dataset (6 Core Tables)
+-- HKU COMP3278A — Introduction to Database Management Systems
 -- ====================================================================
 
 USE `filmcraft`;
 
 -- --------------------------------------------------------------------
--- 1. Seed Users (Superclass & ISA Subclasses)
+-- 1. Seed Users (Cinephiles & Accredited Film Critics)
 -- --------------------------------------------------------------------
-INSERT INTO `users` (`user_id`, `username`, `email`, `password_hash`, `role`, `created_at`) VALUES
-(1, 'alex_chen', 'alex.chen@connect.hku.hk', '$2b$12$e8YkY.k1QoD9jA5l0Y3.YeB4t.uG5n9p0o1i2u3y4t5r6e7w8q9', 'CINEPHILE', '2026-01-15 10:20:00'),
-(2, 'sarah_wong', 'sarah.wong@gmail.com', '$2b$12$e8YkY.k1QoD9jA5l0Y3.YeB4t.uG5n9p0o1i2u3y4t5r6e7w8q9', 'CINEPHILE', '2026-02-01 14:35:00'),
-(3, 'marcus_lee', 'marcus.lee@variety.com', '$2b$12$e8YkY.k1QoD9jA5l0Y3.YeB4t.uG5n9p0o1i2u3y4t5r6e7w8q9', 'CRITIC', '2026-02-10 09:15:00'),
-(4, 'clara_oswald', 'clara.o@sightandsound.org', '$2b$12$e8YkY.k1QoD9jA5l0Y3.YeB4t.uG5n9p0o1i2u3y4t5r6e7w8q9', 'CRITIC', '2026-03-05 16:40:00'),
-(5, 'david_kim', 'david.kim@outlook.com', '$2b$12$e8YkY.k1QoD9jA5l0Y3.YeB4t.uG5n9p0o1i2u3y4t5r6e7w8q9', 'CINEPHILE', '2026-03-20 11:00:00'),
-(6, 'elena_rostova', 'elena@cannes-fest.org', '$2b$12$e8YkY.k1QoD9jA5l0Y3.YeB4t.uG5n9p0o1i2u3y4t5r6e7w8q9', 'CURATOR', '2026-04-01 08:30:00'),
-(7, 'kenneth_tsang', 'k.tsang@hkiff.org.hk', '$2b$12$e8YkY.k1QoD9jA5l0Y3.YeB4t.uG5n9p0o1i2u3y4t5r6e7w8q9', 'CURATOR', '2026-04-15 13:20:00'),
-(8, 'hku_film_soc', 'filmsoc@hku.hk', '$2b$12$e8YkY.k1QoD9jA5l0Y3.YeB4t.uG5n9p0o1i2u3y4t5r6e7w8q9', 'CINEPHILE', '2026-05-01 19:00:00');
-
--- Cinephiles
-INSERT INTO `cinephiles` (`user_id`, `bio`, `favorite_genre`, `membership_tier`) VALUES
-(1, 'HKU CS student & 35mm IMAX enthusiast. Obsessed with non-linear narratives.', 'Sci-Fi', 'PATRON'),
-(2, 'Casual film-goer exploring East Asian cinema and animated classics.', 'Animation', 'PRO'),
-(5, 'Screenwriting hobbyist, massive Denis Villeneuve fan.', 'Drama', 'FREE'),
-(8, 'Official HKU Student Film Society account. Screening indie gems on campus.', 'Documentary', 'PATRON');
-
--- Film Critics
-INSERT INTO `film_critics` (`user_id`, `publication_name`, `critic_license_no`, `is_verified`) VALUES
-(3, 'Variety Film Weekly', 'HK-FCA-2024-8891', TRUE),
-(4, 'Sight & Sound BFI', 'UK-CRIT-9921-X', TRUE);
-
--- Festival Curators
-INSERT INTO `festival_curators` (`user_id`, `festival_organization`, `accreditation_id`) VALUES
-(6, 'Festival de Cannes Selection Committee', 'CAN-CUR-2026-014'),
-(7, 'Hong Kong International Film Festival Society', 'HKIFF-CUR-2026-002');
+INSERT INTO `users` (`user_id`, `username`, `email`, `role`, `membership_tier`, `publication_name`, `created_at`) VALUES
+(1, 'alex_chen',    'alex.chen@connect.hku.hk',  'CINEPHILE', 'PATRON', NULL,                   '2026-01-10 09:00:00'),
+(2, 'sarah_wong',   'sarah.wong@gmail.com',      'CINEPHILE', 'PRO',    NULL,                   '2026-01-14 14:30:00'),
+(3, 'marcus_lee',   'marcus.lee@variety.com',    'CRITIC',    NULL,     'Variety Film Weekly',  '2026-01-20 11:15:00'),
+(4, 'clara_oswald', 'clara.o@sightandsound.org', 'CRITIC',    NULL,     'Sight & Sound BFI',    '2026-02-01 08:45:00'),
+(5, 'david_kim',    'david.kim@outlook.com',     'CINEPHILE', 'FREE',   NULL,                   '2026-02-12 19:20:00'),
+(6, 'hku_film_soc', 'filmsoc@hku.hk',            'CINEPHILE', 'PATRON', NULL,                   '2026-03-10 10:00:00');
 
 -- --------------------------------------------------------------------
--- 2. Seed Movies & Franchises (Self-Referencing Prequels)
+-- 2. Seed Movies (12 Films with Local Posters & Sequel Lineage)
 -- --------------------------------------------------------------------
 INSERT INTO `movies` (`movie_id`, `title`, `release_year`, `duration_minutes`, `language`, `synopsis`, `poster_url`, `prequel_movie_id`) VALUES
-(1, 'Memento', 2000, 113, 'English', 'A man with short-term memory loss attempts to track down his wife’s murderer.', '/posters/memento.jpg', NULL),
-(2, 'The Dark Knight', 2008, 152, 'English', 'When the menace known as the Joker wreaks havoc on Gotham City, Batman must accept one of the greatest tests.', '/posters/Thedarkknight.jpg', NULL),
-(3, 'Inception', 2010, 148, 'English', 'A thief who steals corporate secrets through the use of dream-sharing technology is given an inverse task.', '/posters/Inception.jpg', NULL),
-(4, 'Interstellar', 2014, 169, 'English', 'When Earth becomes uninhabitable in the future, a team of explorers travels through a wormhole.', '/posters/INterstellar.jpg', NULL),
-(5, 'Oppenheimer', 2023, 180, 'English', 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.', '/posters/Oppenheimer.jpg', NULL),
-(6, 'Dune: Part One', 2021, 155, 'English', 'Paul Atreides arrives on Arrakis, the most dangerous planet in the universe, to secure the future of his people.', '/posters/DunePt1.jpg', NULL),
-(7, 'Dune: Part Two', 2024, 166, 'English', 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators.', '/posters/dunept2.jpg', 6),
-(8, 'Spirited Away', 2001, 125, 'Japanese', 'During her family’s move to the suburbs, a 10-year-old girl wanders into a world ruled by spirits.', '/posters/SpirtedAway.jpg', NULL),
-(9, 'Princess Mononoke', 1997, 134, 'Japanese', 'On a journey to find the cure for a curse, Ashitaka finds himself in the middle of a war.', '/posters/Mononoke.jpg', NULL),
-(10, 'Parasite', 2019, 132, 'Korean', 'Greed and class discrimination threaten the newly formed symbiotic relationship between the wealthy Park family and the destitute Kim clan.', '/posters/Parasite.jpg', NULL),
-(11, 'Pulp Fiction', 1994, 154, 'English', 'The lives of two mob hitmen, a boxer, a gangster and his wife intertwine in four tales of violence and redemption.', '/posters/PulpFiction.jpg', NULL);
+(1,  'Memento',           2000, 113, 'English',  'A man with short-term memory loss attempts to track down his wife''s murderer.',                                                  '/posters/memento.jpg',       NULL),
+(2,  'The Dark Knight',   2008, 152, 'English',  'When the menace known as the Joker wreaks havoc on Gotham City, Batman must accept one of the greatest tests.',                  '/posters/Thedarkknight.jpg', NULL),
+(3,  'Inception',         2010, 148, 'English',  'A thief who steals corporate secrets through dream-sharing technology is given an inverse task of planting an idea.',            '/posters/Inception.jpg',     NULL),
+(4,  'Interstellar',      2014, 169, 'English',  'When Earth becomes uninhabitable in the future, a team of explorers travels through a wormhole in search of a new home.',        '/posters/INterstellar.jpg',  NULL),
+(5,  'Oppenheimer',       2023, 180, 'English',  'The story of American physicist J. Robert Oppenheimer and his pivotal role in the development of the atomic bomb.',              '/posters/Oppenheimer.jpg',   NULL),
+(6,  'Dune: Part One',    2021, 155, 'English',  'Paul Atreides arrives on Arrakis, the most dangerous planet in the universe, to secure the future of his family and people.',    '/posters/DunePt1.jpg',       NULL),
+(7,  'Dune: Part Two',    2024, 166, 'English',  'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.',        '/posters/dunept2.jpg',       6),
+(8,  'Spirited Away',     2001, 125, 'Japanese', 'During her family''s move to the suburbs, a 10-year-old girl wanders into a mysterious world ruled by gods and spirits.',        '/posters/SpirtedAway.jpg',   NULL),
+(9,  'Princess Mononoke', 1997, 134, 'Japanese', 'On a journey to find the cure for a Tatarigami''s curse, Ashitaka finds himself caught in a war between forest gods and industry.','/posters/Mononoke.jpg',      NULL),
+(10, 'Parasite',          2019, 132, 'Korean',   'Greed and class discrimination threaten the newly formed symbiotic relationship between the wealthy Park family and the Kim clan.','/posters/Parasite.jpg',      NULL),
+(11, 'Pulp Fiction',      1994, 154, 'English',  'The lives of two mob hitmen, a boxer, a gangster, and his wife intertwine in four tales of violence and redemption.',            '/posters/PulpFiction.jpg',   NULL),
+(12, 'Taxi Driver',       1976, 114, 'English',  'A mentally unstable veteran works as a nighttime taxi driver in New York City, where the perceived decadence fuels his descent.','/posters/taxidriver.jpg',    NULL);
 
--- Movie Genres
+-- --------------------------------------------------------------------
+-- 3. Seed Movie Genres
+-- --------------------------------------------------------------------
 INSERT INTO `movie_genres` (`movie_id`, `genre_name`) VALUES
-(1, 'Mystery'), (1, 'Thriller'),
-(2, 'Action'), (2, 'Crime'), (2, 'Drama'),
-(3, 'Action'), (3, 'Sci-Fi'), (3, 'Adventure'),
-(4, 'Adventure'), (4, 'Drama'), (4, 'Sci-Fi'),
-(5, 'Biography'), (5, 'Drama'), (5, 'History'),
-(6, 'Action'), (6, 'Adventure'), (6, 'Sci-Fi'),
-(7, 'Action'), (7, 'Adventure'), (7, 'Sci-Fi'),
-(8, 'Animation'), (8, 'Adventure'), (8, 'Family'),
-(9, 'Animation'), (9, 'Action'), (9, 'Fantasy'),
-(10, 'Drama'), (10, 'Thriller'), (10, 'Comedy'),
-(11, 'Crime'), (11, 'Drama');
+(1,  'Mystery'),   (1,  'Thriller'),
+(2,  'Action'),    (2,  'Crime'),     (2,  'Drama'),
+(3,  'Action'),    (3,  'Sci-Fi'),    (3,  'Adventure'),
+(4,  'Adventure'), (4,  'Drama'),     (4,  'Sci-Fi'),
+(5,  'Biography'), (5,  'Drama'),     (5,  'History'),
+(6,  'Action'),    (6,  'Adventure'), (6,  'Sci-Fi'),
+(7,  'Action'),    (7,  'Adventure'), (7,  'Sci-Fi'),
+(8,  'Animation'), (8,  'Adventure'), (8,  'Family'),
+(9,  'Animation'), (9,  'Action'),    (9,  'Fantasy'),
+(10, 'Drama'),     (10, 'Thriller'),  (10, 'Comedy'),
+(11, 'Crime'),     (11, 'Drama'),
+(12, 'Crime'),     (12, 'Drama');
 
 -- --------------------------------------------------------------------
--- 3. Seed Film Professionals & Cast/Crew
+-- 4. Seed Film Professionals
 -- --------------------------------------------------------------------
-INSERT INTO `film_professionals` (`person_id`, `name`, `birth_date`, `nationality`, `biography`) VALUES
-(1, 'Christopher Nolan', '1970-07-30', 'British', 'Visionary director renowned for practical effects and non-linear narrative architecture.'),
-(2, 'Hayao Miyazaki', '1941-01-05', 'Japanese', 'Legendary co-founder of Studio Ghibli and master of traditional hand-drawn animation.'),
-(3, 'Denis Villeneuve', '1967-10-03', 'Canadian', 'Acclaimed director known for immersive sci-fi world-building and atmosphere.'),
-(4, 'Bong Joon-ho', '1969-09-14', 'South Korean', 'Palme d’Or and Academy Award-winning filmmaker known for sharp social satire.'),
-(5, 'Quentin Tarantino', '1963-03-27', 'American', 'Auteur filmmaker celebrated for stylized non-linear dialogues and pop culture tributes.'),
-(6, 'Cillian Murphy', '1976-05-25', 'Irish', 'Celebrated actor and frequent Nolan collaborator, winner of Best Actor for Oppenheimer.'),
-(7, 'Christian Bale', '1974-01-30', 'British', 'Transformative method actor who played Bruce Wayne / Batman in The Dark Knight trilogy.'),
-(8, 'Leonardo DiCaprio', '1974-11-11', 'American', 'Academy Award-winning lead actor in Inception.'),
-(9, 'Timothée Chalamet', '1995-12-27', 'American', 'Leading actor portraying Paul Atreides in the Dune franchise.'),
-(10, 'Song Kang-ho', '1967-01-17', 'South Korean', 'Iconic South Korean actor starring in Parasite and Memories of Murder.'),
-(11, 'Hoyte van Hoytema', '1971-10-04', 'Dutch', 'Oscar-winning cinematographer known for 70mm IMAX photography with Nolan.'),
-(12, 'Zendaya', '1996-09-01', 'American', 'Leading actress playing Chani in the Dune franchise.');
-
--- Cast & Crew Linking (N:M with descriptive attributes)
-INSERT INTO `movie_cast_crew` (`movie_id`, `person_id`, `role_type`, `character_name`, `billing_order`) VALUES
--- Nolan Films (Director, Actor, Cinematographer)
-(1, 1, 'DIRECTOR', NULL, 1),
-(2, 1, 'DIRECTOR', NULL, 1),
-(2, 7, 'ACTOR', 'Bruce Wayne / Batman', 1),
-(3, 1, 'DIRECTOR', NULL, 1),
-(3, 8, 'ACTOR', 'Dom Cobb', 1),
-(4, 1, 'DIRECTOR', NULL, 1),
-(4, 11, 'CINEMATOGRAPHER', NULL, 2),
-(5, 1, 'DIRECTOR', NULL, 1),
-(5, 6, 'ACTOR', 'J. Robert Oppenheimer', 1),
-(5, 11, 'CINEMATOGRAPHER', NULL, 2),
--- Villeneuve Films
-(6, 3, 'DIRECTOR', NULL, 1),
-(6, 9, 'ACTOR', 'Paul Atreides', 1),
-(6, 12, 'ACTOR', 'Chani', 2),
-(7, 3, 'DIRECTOR', NULL, 1),
-(7, 9, 'ACTOR', 'Paul Atreides', 1),
-(7, 12, 'ACTOR', 'Chani', 2),
--- Miyazaki Films
-(8, 2, 'DIRECTOR', NULL, 1),
-(9, 2, 'DIRECTOR', NULL, 1),
--- Bong Joon-ho Film
-(10, 4, 'DIRECTOR', NULL, 1),
-(10, 10, 'ACTOR', 'Kim Ki-taek', 1),
--- Tarantino Film
-(11, 5, 'DIRECTOR', NULL, 1);
+INSERT INTO `film_professionals` (`person_id`, `name`, `nationality`, `biography`) VALUES
+(1,  'Christopher Nolan', 'British',      'Visionary director renowned for practical effects and non-linear narrative architecture.'),
+(2,  'Hayao Miyazaki',    'Japanese',     'Legendary co-founder of Studio Ghibli and master of traditional hand-drawn animation.'),
+(3,  'Denis Villeneuve',  'Canadian',     'Acclaimed director known for immersive sci-fi world-building and atmosphere.'),
+(4,  'Bong Joon-ho',      'South Korean', 'Palme d''Or and Academy Award-winning filmmaker known for sharp social satire.'),
+(5,  'Quentin Tarantino', 'American',     'Auteur filmmaker celebrated for stylized non-linear dialogues and cinema homages.'),
+(6,  'Martin Scorsese',   'American',     'Master of New Hollywood cinema exploring guilt, obsession, and urban alienation.'),
+(7,  'Cillian Murphy',    'Irish',        'Celebrated actor and frequent Nolan collaborator, lead in Oppenheimer.'),
+(8,  'Christian Bale',    'British',      'Transformative method actor starring as Bruce Wayne in The Dark Knight.'),
+(9,  'Leonardo DiCaprio', 'American',     'Academy Award-winning lead actor in Inception.'),
+(10, 'Timothée Chalamet', 'American',     'Leading actor portraying Paul Atreides in the Dune franchise.'),
+(11, 'Song Kang-ho',      'South Korean', 'Iconic South Korean actor starring in Parasite.'),
+(12, 'Zendaya',           'American',     'Leading actress portraying Chani in the Dune franchise.');
 
 -- --------------------------------------------------------------------
--- 4. Seed Theaters, Screening Rooms (Weak Entity) & Screenings
+-- 5. Seed Movie Cast & Crew
 -- --------------------------------------------------------------------
-INSERT INTO `theaters` (`theater_id`, `name`, `city`, `address`) VALUES
-(1, 'Broadway Cinematheque', 'Hong Kong', 'Prosperous Garden, 3 Public Square St, Yau Ma Tei'),
-(2, 'Premiere Elements', 'Hong Kong', 'Elements Mall, 1 Austin Rd W, Tsim Sha Tsui'),
-(3, 'Emperor Cinemas Times Square', 'Hong Kong', 'Level 12-14, Times Square, 1 Matheson St, Causeway Bay'),
-(4, 'K11 Art House', 'Hong Kong', 'Level 4, K11 MUSEA, Victoria Dockside, Tsim Sha Tsui');
-
--- Weak Entity: TheaterRoom
-INSERT INTO `theater_rooms` (`theater_id`, `room_number`, `seating_capacity`, `screen_format`) VALUES
-(1, 1, 160, 'STANDARD'),
-(1, 2, 115, 'STANDARD'),
-(2, 1, 280, 'IMAX'),
-(2, 2, 150, 'DOLBY'),
-(3, 1, 210, 'IMAX'),
-(3, 2, 90, 'STANDARD'),
-(4, 1, 350, 'IMAX');
-
--- Theater Screenings
-INSERT INTO `theater_screenings` (`screening_id`, `theater_id`, `room_number`, `movie_id`, `screening_datetime`, `ticket_price`) VALUES
-(1, 2, 1, 5, '2026-11-01 19:30:00', 160.00), -- Oppenheimer in IMAX
-(2, 2, 1, 7, '2026-11-02 20:00:00', 160.00), -- Dune 2 in IMAX
-(3, 1, 1, 8, '2026-11-01 15:00:00', 95.00),  -- Spirited Away at BC
-(4, 1, 1, 9, '2026-11-01 18:00:00', 95.00),  -- Princess Mononoke at BC
-(5, 1, 2, 10, '2026-11-02 21:00:00', 95.00), -- Parasite at BC
-(6, 3, 1, 7, '2026-11-03 14:30:00', 150.00), -- Dune 2 at Emperor
-(7, 4, 1, 3, '2026-11-05 19:00:00', 170.00); -- Inception retrospective at K11
+INSERT INTO `movie_cast_crew` (`movie_id`, `person_id`, `role_type`) VALUES
+(1,  1,  'DIRECTOR'),
+(2,  1,  'DIRECTOR'), (2,  8,  'ACTOR'),
+(3,  1,  'DIRECTOR'), (3,  9,  'ACTOR'),
+(4,  1,  'DIRECTOR'),
+(5,  1,  'DIRECTOR'), (5,  7,  'ACTOR'),
+(6,  3,  'DIRECTOR'), (6,  10, 'ACTOR'), (6,  12, 'ACTOR'),
+(7,  3,  'DIRECTOR'), (7,  10, 'ACTOR'), (7,  12, 'ACTOR'),
+(8,  2,  'DIRECTOR'),
+(9,  2,  'DIRECTOR'),
+(10, 4,  'DIRECTOR'), (10, 11, 'ACTOR'),
+(11, 5,  'DIRECTOR'),
+(12, 6,  'DIRECTOR');
 
 -- --------------------------------------------------------------------
--- 5. Seed Reviews & Ratings (0 to 5 Stars Scale)
--- NOTE: alex_chen (user_id = 1) has reviewed EVERY Christopher Nolan film (movies 1, 2, 3, 4, 5)!
+-- 6. Seed Reviews (0-5 Discrete Star Scale)
+-- Note: alex_chen (user_id 1) reviewed all 5 Nolan films (Division Winner)
 -- --------------------------------------------------------------------
 INSERT INTO `reviews` (`review_id`, `user_id`, `movie_id`, `rating`, `review_text`, `contains_spoilers`, `watch_date`, `created_at`) VALUES
--- Alex Chen (Cinephile 1): Complete coverage of Christopher Nolan
-(1, 1, 1, 5, 'Memento is a masterclass in structural editing and neo-noir tension.', FALSE, '2026-08-01', '2026-08-01 22:00:00'),
-(2, 1, 2, 5, 'Heath Ledger’s Joker is unmatched. Flawless pacing and thematic depth.', FALSE, '2026-08-10', '2026-08-10 21:30:00'),
-(3, 1, 3, 5, 'Inception redefines modern blockbusters with emotional gravity and complex physics.', FALSE, '2026-08-15', '2026-08-15 23:15:00'),
-(4, 1, 4, 5, 'Interstellar made me weep in 70mm IMAX. Zimmer’s organ score is transcendent.', FALSE, '2026-08-25', '2026-08-25 20:00:00'),
-(5, 1, 5, 5, 'Oppenheimer is a devastating, relentless biographical thriller.', FALSE, '2026-09-01', '2026-09-01 22:45:00'),
-
--- Sarah Wong (Cinephile 2)
-(6, 2, 8, 5, 'Spirited Away is pure magic. Nostalgic, heartwarming, visually gorgeous.', FALSE, '2026-09-05', '2026-09-05 18:20:00'),
-(7, 2, 9, 4, 'Princess Mononoke handles ecological themes with incredible nuance.', FALSE, '2026-09-12', '2026-09-12 19:40:00'),
-(8, 2, 2, 4, 'Great superhero movie, although slightly long in the final act.', FALSE, '2026-09-20', '2026-09-20 21:10:00'),
-
--- Marcus Lee (Critic 3)
-(9, 3, 5, 5, 'Oppenheimer stands as the crowning achievement of Nolan’s cinematic career.', FALSE, '2026-09-15', '2026-09-15 10:00:00'),
-(10, 3, 7, 5, 'Dune: Part Two is science fiction on a grand, operatic scale.', FALSE, '2026-09-18', '2026-09-18 11:30:00'),
-(11, 3, 10, 5, 'Parasite is pitch-perfect in every beat, tone, and framing.', FALSE, '2026-09-22', '2026-09-22 15:45:00'),
-
--- Clara Oswald (Critic 4): Complete coverage of Hayao Miyazaki
-(12, 4, 8, 5, 'A timeless milestone of world animation cinema.', FALSE, '2026-09-10', '2026-09-10 14:00:00'),
-(13, 4, 9, 5, 'Miyazaki’s magnum opus on the friction between humanity and nature.', FALSE, '2026-09-14', '2026-09-14 16:30:00'),
-
--- David Kim (Cinephile 5)
-(14, 5, 6, 4, 'Great atmosphere and sound design, setting up the sequel nicely.', FALSE, '2026-09-28', '2026-09-28 20:30:00'),
-(15, 5, 7, 5, 'Desert warfare and soundscapes are mindblowing. Best theater experience of 2024.', FALSE, '2026-10-02', '2026-10-02 22:15:00'),
-(16, 5, 10, 4, 'The peach scene still gives me chills.', FALSE, '2026-10-10', '2026-10-10 19:00:00');
-
--- --------------------------------------------------------------------
--- 6. Seed Curated Watchlists & Entries
--- --------------------------------------------------------------------
-INSERT INTO `watchlists` (`list_id`, `user_id`, `title`, `description`, `is_public`, `created_at`) VALUES
-(1, 1, 'Non-Linear Cinematic Puzzles', 'Films that deconstruct narrative timelines and memory.', TRUE, '2026-08-05 12:00:00'),
-(2, 4, 'Studio Ghibli Essentials', 'Core masterpieces for anyone new to Japanese animation.', TRUE, '2026-09-15 17:00:00'),
-(3, 5, 'Modern Sci-Fi Masterworks', 'Immersive large-format sci-fi epics of the 21st century.', TRUE, '2026-10-05 14:00:00');
-
-INSERT INTO `watchlist_entries` (`list_id`, `movie_id`, `rank_order`, `curator_note`) VALUES
-(1, 1, 1, 'The gold standard of reverse-chronology storytelling.'),
-(1, 3, 2, 'Dreams nested inside dreams.'),
-(1, 11, 3, 'Tarantino’s fragmented anthology.'),
-(2, 8, 1, 'Oscar-winning fantasy journey.'),
-(2, 9, 2, 'Epic historical conflict between man and god-beasts.'),
-(3, 4, 1, 'Emotional realism coupled with Kip Thorne’s relativity physics.'),
-(3, 6, 2, 'Visually breathtaking world-building of Frank Herbert’s universe.'),
-(3, 7, 3, 'The definitive sci-fi climax.');
-
--- --------------------------------------------------------------------
--- 7. Seed Festivals, Awards & Nominations
--- --------------------------------------------------------------------
-INSERT INTO `festivals` (`festival_id`, `name`, `city`, `established_year`) VALUES
-(1, 'Festival de Cannes', 'Cannes', 1946),
-(2, 'Academy Awards (The Oscars)', 'Los Angeles', 1929),
-(3, 'Hong Kong International Film Festival (HKIFF)', 'Hong Kong', 1977);
-
-INSERT INTO `festival_awards` (`award_id`, `festival_id`, `category_name`, `award_year`) VALUES
-(1, 1, 'Palme d’Or', 2019),
-(2, 2, 'Best Picture', 2024),
-(3, 2, 'Best Director', 2024),
-(4, 2, 'Best Animated Feature', 2003),
-(5, 3, 'Firebird Award', 2024),
-(6, 1, 'Palme d’Or', 1994),
-(7, 2, 'Best Original Screenplay', 1995),
-(8, 2, 'Best Actor in a Leading Role', 2024),
-(9, 2, 'Best Cinematography', 2024),
-(10, 2, 'Best Supporting Actor', 2009),
-(11, 2, 'Best Actor in a Leading Role', 2011),
-(12, 3, 'Asian Cinema Master Award', 2020);
-
-INSERT INTO `award_nominations` (`nomination_id`, `award_id`, `movie_id`, `person_id`, `is_winner`) VALUES
-(1, 1, 10, 4, TRUE),   -- Parasite won Palme d'Or (Bong Joon-ho)
-(2, 2, 5, 1, TRUE),    -- Oppenheimer won Best Picture (Christopher Nolan)
-(3, 3, 5, 1, TRUE),    -- Christopher Nolan won Best Director for Oppenheimer
-(4, 4, 8, 2, TRUE),    -- Spirited Away won Best Animated Feature (Hayao Miyazaki)
-(5, 5, 7, 3, TRUE),    -- Dune: Part Two won at HKIFF (Denis Villeneuve)
-(6, 6, 11, 5, TRUE),   -- Pulp Fiction won Palme d'Or (Quentin Tarantino)
-(7, 7, 11, 5, TRUE),   -- Quentin Tarantino won Best Original Screenplay for Pulp Fiction
-(8, 8, 5, 6, TRUE),    -- Cillian Murphy won Best Actor for Oppenheimer
-(9, 9, 5, 11, TRUE),   -- Hoyte van Hoytema won Best Cinematography for Oppenheimer
-(10, 10, 2, 7, FALSE), -- Christian Bale nominated for The Dark Knight
-(11, 11, 3, 8, FALSE), -- Leonardo DiCaprio nominated for Inception
-(12, 12, 10, 10, TRUE);-- Song Kang-ho won Asian Cinema Master Award for Parasite
+(1,  1, 1,  5, 'A reverse-chronological masterclass in unreliable narration.',                              FALSE, '2026-08-01', '2026-08-02 10:00:00'),
+(2,  1, 2,  5, 'Unrivaled tension and Heath Ledger''s unforgettable performance.',                        FALSE, '2026-08-05', '2026-08-06 11:00:00'),
+(3,  1, 3,  4, 'Stunning dream-heist architecture with Zimmer''s iconic score.',                          FALSE, '2026-08-10', '2026-08-11 12:00:00'),
+(4,  1, 4,  5, 'Visually overwhelming and deeply emotional sci-fi.',                                      TRUE,  '2026-08-15', '2026-08-16 14:00:00'),
+(5,  1, 5,  5, 'Relentless three-hour biographical thriller shot in 70mm IMAX.',                            FALSE, '2026-08-20', '2026-08-21 16:00:00'),
+(6,  2, 2,  5, 'Still the gold standard for superhero cinema.',                                           FALSE, '2026-09-01', '2026-09-02 19:00:00'),
+(7,  2, 3,  4, 'Complex narrative layers that reward every rewatch.',                                     FALSE, '2026-09-04', '2026-09-05 20:00:00'),
+(8,  2, 8,  5, 'Pure animated magic; every single frame belongs in a gallery.',                           FALSE, '2026-09-10', '2026-09-11 21:00:00'),
+(9,  2, 7,  5, 'Dune: Part Two was breathtaking in IMAX. Peak sci-fi filmmaking.',                        FALSE, '2026-10-15', '2026-10-15 22:30:00'),
+(10, 3, 5,  5, 'Nolan''s most mature technical achievement; Cillian Murphy is phenomenal.',               FALSE, '2026-09-12', '2026-09-13 09:00:00'),
+(11, 3, 7,  5, 'Science fiction on a grand, operatic scale.',                                             FALSE, '2026-09-18', '2026-09-18 11:30:00'),
+(12, 3, 10, 5, 'Bong Joon-ho dissects class warfare with surgical precision.',                             TRUE,  '2026-09-20', '2026-09-21 15:00:00'),
+(13, 4, 8,  5, 'Miyazaki crafts a timeless allegory of identity and consumerism.',                        FALSE, '2026-09-25', '2026-09-26 10:15:00'),
+(14, 4, 9,  4, 'An ambitious ecological epic without simple heroes or villains.',                         FALSE, '2026-09-28', '2026-09-29 14:45:00'),
+(15, 5, 6,  4, 'Slow-burn world building with jaw-dropping desert cinematography.',                       FALSE, '2026-10-01', '2026-10-01 21:00:00'),
+(16, 5, 7,  5, 'Desert warfare and soundscapes are mindblowing. Best theater experience of 2024.',        FALSE, '2026-10-02', '2026-10-02 22:15:00'),
+(17, 6, 11, 4, 'Sharp, rhythmic dialogue that redefined 1990s independent cinema.',                       FALSE, '2026-10-10', '2026-10-11 18:00:00'),
+(18, 3, 12, 5, 'A dark, hypnotic portrait of urban alienation and obsession.',                            FALSE, '2026-10-18', '2026-10-18 20:00:00');

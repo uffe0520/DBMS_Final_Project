@@ -1,286 +1,128 @@
 -- ====================================================================
--- HKU COMP3278A — Final Project Master Query Portfolio
--- System: FilmCraft (Letterboxd+) Cinema & Festival Curator Platform
--- Engine: MySQL 8.x
--- All queries strictly comply with course restrictions from AGY.md:
+-- FilmCraft: Key SQL Statements (Presentation & Verification Reference)
+-- HKU COMP3278A — Introduction to Database Management Systems
+-- 4 Core SQL Patterns Directly Executed by the Web Application
+-- ====================================================================
 
 USE `filmcraft`;
 
--- ====================================================================
--- TIER 1: DATA MANIPULATION & ATOMIC TRANSACTIONS
--- ====================================================================
-
--- Query 1.1: Atomic User Review Submission Transaction
--- Simulates a user submitting a new review and updating their favorite genre
-START TRANSACTION;
-
-INSERT INTO `reviews` (`user_id`, `movie_id`, `rating`, `review_text`, `contains_spoilers`, `watch_date`, `created_at`)
-VALUES (2, 7, 5, 'Dune Part Two was breathtaking in IMAX. Peak sci-fi filmmaking.', FALSE, '2026-10-15', '2026-10-15 22:30:00');
-
-UPDATE `cinephiles`
-SET `favorite_genre` = 'Sci-Fi'
-WHERE `user_id` = 2;
-
-COMMIT;
-
--- Query 1.2: Conditional UPDATE with Cascading Constraints
--- Upgrades cinephiles with 5 or more reviews to 'PRO' status
-UPDATE `cinephiles`
-SET `membership_tier` = 'PRO'
-WHERE `user_id` IN (
-    SELECT `user_id`
-    FROM (
-        SELECT R.`user_id`
-        FROM `reviews` R
-        GROUP BY R.`user_id`
-        HAVING COUNT(*) >= 5
-    ) AS `active_users`
-);
-
-
--- ====================================================================
--- TIER 2: RELATIONAL PROJECTIONS & MULTI-TABLE JOINS
--- ====================================================================
-
--- Query 2.1: Multi-way 5-Table Join
--- Purpose: List theatrical screenings with cinema details, movie title, director, and ticket price
--- Relational Algebra:
---   \pi_{theater_name, room_number, movie_title, director_name, screening_datetime, ticket_price}(
---       Theater \bowtie TheaterRoom \bowtie TheaterScreening \bowtie Movie \bowtie
---       \sigma_{role='DIRECTOR'}(MovieCastCrew \bowtie FilmProfessional)
---   )
+-- --------------------------------------------------------------------
+-- QUERY 1: Multi-Table JOIN with Derived Table Pre-Aggregation
+-- Purpose: Populates the Film Catalog without Cartesian fan-out
+--          multiplication between multi-valued genres and reviews.
+-- --------------------------------------------------------------------
 SELECT 
-    T.`name` AS `theater_name`,
-    TR.`room_number`,
-    TR.`screen_format`,
-    M.`title` AS `movie_title`,
-    FP.`name` AS `director_name`,
-    TS.`screening_datetime`,
-    TS.`ticket_price`
-FROM `theaters` T
-JOIN `theater_rooms` TR 
-    ON T.`theater_id` = TR.`theater_id`
-JOIN `theater_screenings` TS 
-    ON TR.`theater_id` = TS.`theater_id` AND TR.`room_number` = TS.`room_number`
-JOIN `movies` M 
-    ON TS.`movie_id` = M.`movie_id`
-JOIN `movie_cast_crew` MCC 
-    ON M.`movie_id` = MCC.`movie_id` AND MCC.`role_type` = 'DIRECTOR'
-JOIN `film_professionals` FP 
-    ON MCC.`person_id` = FP.`person_id`
-WHERE TS.`screening_datetime` >= '2026-11-01 00:00:00'
-ORDER BY TS.`screening_datetime` ASC;
+    M.movie_id,
+    M.title,
+    M.release_year,
+    M.duration_minutes,
+    M.language,
+    M.synopsis,
+    M.poster_url,
+    P.title AS prequel_title,
+    FP.name AS director_name,
+    MG_Agg.genres,
+    COALESCE(R_Agg.total_reviews, 0) AS total_reviews,
+    COALESCE(R_Agg.average_rating, 0.0) AS average_rating
+FROM movies M
+LEFT JOIN movies P
+    ON M.prequel_movie_id = P.movie_id
+LEFT JOIN movie_cast_crew MCC
+    ON M.movie_id = MCC.movie_id AND MCC.role_type = 'DIRECTOR'
+LEFT JOIN film_professionals FP
+    ON MCC.person_id = FP.person_id
+LEFT JOIN (
+    SELECT movie_id, GROUP_CONCAT(genre_name ORDER BY genre_name SEPARATOR ', ') AS genres
+    FROM movie_genres
+    GROUP BY movie_id
+) MG_Agg ON M.movie_id = MG_Agg.movie_id
+LEFT JOIN (
+    SELECT movie_id, COUNT(review_id) AS total_reviews, ROUND(AVG(rating), 1) AS average_rating
+    FROM reviews
+    GROUP BY movie_id
+) R_Agg ON M.movie_id = R_Agg.movie_id
+ORDER BY average_rating DESC, total_reviews DESC, M.release_year DESC;
 
--- Query 2.2: Left Outer Join
--- Purpose: Find ALL movies in the catalog, including indie/festival films that have ZERO reviews yet
+-- --------------------------------------------------------------------
+-- QUERY 2: Full Explicit CRUD Operations (Reviews & Movies)
+-- Purpose: Demonstrates parameterized CREATE, READ, UPDATE, DELETE
+--          and referential integrity (ON DELETE CASCADE / SET NULL).
+-- --------------------------------------------------------------------
+
+-- [CREATE] Insert a new review (0-5 stars)
+-- INSERT INTO reviews (user_id, movie_id, rating, review_text, contains_spoilers, watch_date)
+-- VALUES (?, ?, ?, ?, ?, CURDATE());
+
+-- [READ] Retrieve all reviews for a given movie with reviewer details
 SELECT 
-    M.`movie_id`,
-    M.`title`,
-    M.`release_year`,
-    COUNT(R.`review_id`) AS `total_reviews`,
-    COALESCE(ROUND(AVG(R.`rating`), 2), 0.00) AS `average_rating`
-FROM `movies` M
-LEFT OUTER JOIN `reviews` R 
-    ON M.`movie_id` = R.`movie_id`
-GROUP BY M.`movie_id`, M.`title`, M.`release_year`
-ORDER BY `total_reviews` DESC, M.`release_year` DESC;
+    R.review_id,
+    U.username,
+    U.role,
+    U.membership_tier,
+    U.publication_name,
+    R.rating,
+    R.review_text,
+    R.contains_spoilers,
+    R.watch_date
+FROM reviews R
+JOIN users U ON R.user_id = U.user_id
+WHERE R.movie_id = 7
+ORDER BY R.created_at DESC;
 
--- Query 2.3: Self-Join (Hierarchical Franchise Relations)
--- Purpose: Pair every sequel with its predecessor prequel movie
+-- [UPDATE] Edit an existing review's rating, text, and spoiler flag
+-- UPDATE reviews
+-- SET rating = ?, review_text = ?, contains_spoilers = ?
+-- WHERE review_id = ?;
+
+-- [DELETE] Remove a review (or delete a movie, cascading to genres/cast/reviews)
+-- DELETE FROM reviews WHERE review_id = ?;
+-- DELETE FROM movies WHERE movie_id = ?;
+
+-- --------------------------------------------------------------------
+-- QUERY 3: Multi-Table Aggregation & Grouping (Director Leaderboard)
+-- Purpose: Ranks directors by average rating across their catalogued
+--          films using pre-aggregated review scores.
+-- --------------------------------------------------------------------
 SELECT 
-    sequel.`title` AS `sequel_title`,
-    sequel.`release_year` AS `sequel_year`,
-    prequel.`title` AS `prequel_title`,
-    prequel.`release_year` AS `prequel_year`,
-    (sequel.`release_year` - prequel.`release_year`) AS `years_between_releases`
-FROM `movies` sequel
-JOIN `movies` prequel 
-    ON sequel.`prequel_movie_id` = prequel.`movie_id`;
+    FP.name AS director_name,
+    FP.nationality,
+    COUNT(DISTINCT MCC.movie_id) AS total_films_directed,
+    COALESCE(SUM(R_Agg.total_reviews), 0) AS total_reviews,
+    COALESCE(ROUND(AVG(R_Agg.average_rating), 2), 0.00) AS average_rating
+FROM film_professionals FP
+JOIN movie_cast_crew MCC
+    ON FP.person_id = MCC.person_id AND MCC.role_type = 'DIRECTOR'
+LEFT JOIN (
+    SELECT movie_id, COUNT(review_id) AS total_reviews, AVG(rating) AS average_rating
+    FROM reviews
+    GROUP BY movie_id
+) R_Agg ON MCC.movie_id = R_Agg.movie_id
+GROUP BY FP.person_id, FP.name, FP.nationality
+HAVING COUNT(DISTINCT MCC.movie_id) >= 1
+ORDER BY average_rating DESC, total_reviews DESC;
 
-
--- ====================================================================
--- TIER 3: AGGREGATIONS, GROUPING & HAVING FILTERS
--- ====================================================================
-
--- Query 3.1: Director Performance Aggregation
--- Purpose: Find directors whose films have received at least 2 reviews, with an overall average rating >= 4.25
--- Relational Algebra:
---   \sigma_{avg_score \ge 4.25 \land review_cnt \ge 2}(
---       _{person_id, director_name}\mathcal{G}_{AVG(rating) \to avg_score, COUNT(review_id) \to review_cnt}(
---           FilmProfessional \bowtie \sigma_{role='DIRECTOR'}(MovieCastCrew) \bowtie Movie \bowtie Review
---       )
---   )
+-- --------------------------------------------------------------------
+-- QUERY 4: Relational Division via Double NOT EXISTS
+-- Purpose: Finds users who have reviewed EVERY film directed by
+--          Christopher Nolan in the database (Universal Quantification).
+-- --------------------------------------------------------------------
 SELECT 
-    FP.`person_id`,
-    FP.`name` AS `director_name`,
-    COUNT(DISTINCT M.`movie_id`) AS `directed_movies_reviewed`,
-    COUNT(R.`review_id`) AS `total_reviews_received`,
-    ROUND(AVG(R.`rating`), 2) AS `average_director_rating`
-FROM `film_professionals` FP
-JOIN `movie_cast_crew` MCC 
-    ON FP.`person_id` = MCC.`person_id` AND MCC.`role_type` = 'DIRECTOR'
-JOIN `movies` M 
-    ON MCC.`movie_id` = M.`movie_id`
-JOIN `reviews` R 
-    ON M.`movie_id` = R.`movie_id`
-GROUP BY FP.`person_id`, FP.`name`
-HAVING COUNT(R.`review_id`) >= 2 AND AVG(R.`rating`) >= 4.25
-ORDER BY `average_director_rating` DESC, `total_reviews_received` DESC;
-
-
--- ====================================================================
--- TIER 4: CORRELATED SUBQUERIES & SET COMPARISONS
--- ====================================================================
-
--- Query 4.1: Universal Set Comparison (>= ALL)
--- Purpose: Find the single or tied film(s) that achieved the GREATEST count of maximum (5/5 stars) ratings
--- NOTE: Complies with syllabus rule: NO 'ORDER BY ... LIMIT 1' hack!
-SELECT 
-    M.`movie_id`,
-    M.`title`,
-    COUNT(R.`review_id`) AS `num_perfect_scores`
-FROM `movies` M
-JOIN `reviews` R 
-    ON M.`movie_id` = R.`movie_id`
-WHERE R.`rating` = 5
-GROUP BY M.`movie_id`, M.`title`
-HAVING COUNT(R.`review_id`) >= ALL (
-    SELECT COUNT(R2.`review_id`)
-    FROM `reviews` R2
-    WHERE R2.`rating` = 5
-    GROUP BY R2.`movie_id`
-);
-
--- Query 4.2: Correlated Subquery with NOT EXISTS
--- Purpose: Find all accredited film critics who have NEVER given any film a rating below 4 stars
-SELECT 
-    U.`user_id`,
-    U.`username`,
-    FC.`publication_name`
-FROM `users` U
-JOIN `film_critics` FC 
-    ON U.`user_id` = FC.`user_id`
+    U.username,
+    U.email,
+    U.role,
+    U.membership_tier
+FROM users U
 WHERE NOT EXISTS (
-    SELECT 1
-    FROM `reviews` R
-    WHERE R.`user_id` = U.`user_id`
-      AND R.`rating` < 4
+    SELECT M.movie_id
+    FROM movies M
+    JOIN movie_cast_crew MCC ON M.movie_id = MCC.movie_id
+    JOIN film_professionals FP ON MCC.person_id = FP.person_id
+    WHERE FP.name = 'Christopher Nolan'
+      AND MCC.role_type = 'DIRECTOR'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM reviews R
+          WHERE R.user_id = U.user_id
+            AND R.movie_id = M.movie_id
+      )
 );
-
--- Query 4.3: Derived Table in the FROM Clause (CTE Alternative)
--- Purpose: Compare each movie's average rating against the global average rating across all movies
-SELECT 
-    M.`title`,
-    ROUND(AVG(R.`rating`), 2) AS `movie_avg_rating`,
-    GlobalStats.`overall_avg`,
-    ROUND(AVG(R.`rating`) - GlobalStats.`overall_avg`, 2) AS `difference_from_mean`
-FROM `movies` M
-JOIN `reviews` R 
-    ON M.`movie_id` = R.`movie_id`,
-(
-    SELECT ROUND(AVG(`rating`), 2) AS `overall_avg`
-    FROM `reviews`
-) AS GlobalStats
-GROUP BY M.`movie_id`, M.`title`, GlobalStats.`overall_avg`
-ORDER BY `movie_avg_rating` DESC;
-
-
--- ====================================================================
--- TIER 5: RELATIONAL DIVISION (UNIVERSAL QUANTIFICATION: R / S)
--- ====================================================================
-
--- Query 5.1: Classical Double NOT EXISTS Division
--- Question: "Find all users who have watched and reviewed EVERY film directed by Christopher Nolan."
--- Relational Algebra:
---   \pi_{user_id}(Reviews) \div \pi_{movie_id}(\sigma_{name='Christopher Nolan' \land role='DIRECTOR'}(FilmProfessional \bowtie MovieCastCrew))
-SELECT 
-    U.`user_id`,
-    U.`username`,
-    U.`email`,
-    U.`role`
-FROM `users` U
-WHERE NOT EXISTS (
-    -- Set of all movies directed by Christopher Nolan (person_id = 1):
-    SELECT M.`movie_id`
-    FROM `movies` M
-    JOIN `movie_cast_crew` MCC 
-        ON M.`movie_id` = MCC.`movie_id`
-    WHERE MCC.`person_id` = 1 AND MCC.`role_type` = 'DIRECTOR'
-    AND NOT EXISTS (
-        -- Check if this specific user has reviewed the movie:
-        SELECT 1
-        FROM `reviews` R
-        WHERE R.`user_id` = U.`user_id`
-          AND R.`movie_id` = M.`movie_id`
-    )
-);
-
--- Query 5.2: Alternative Relational Division using COUNT(DISTINCT)
--- Produces the identical mathematical result:
-SELECT 
-    U.`user_id`,
-    U.`username`,
-    COUNT(DISTINCT M.`movie_id`) AS `nolan_movies_reviewed`
-FROM `users` U
-JOIN `reviews` R 
-    ON U.`user_id` = R.`user_id`
-JOIN `movies` M 
-    ON R.`movie_id` = M.`movie_id`
-JOIN `movie_cast_crew` MCC 
-    ON M.`movie_id` = MCC.`movie_id`
-WHERE MCC.`person_id` = 1 AND MCC.`role_type` = 'DIRECTOR'
-GROUP BY U.`user_id`, U.`username`
-HAVING COUNT(DISTINCT M.`movie_id`) = (
-    SELECT COUNT(DISTINCT M2.`movie_id`)
-    FROM `movies` M2
-    JOIN `movie_cast_crew` MCC2 
-        ON M2.`movie_id` = MCC2.`movie_id`
-    WHERE MCC2.`person_id` = 1 AND MCC2.`role_type` = 'DIRECTOR'
-);
-
-
--- ====================================================================
--- TIER 6: DATABASE VIEWS FOR BUSINESS INTELLIGENCE DASHBOARDS
--- ====================================================================
-
--- View 6.1: Theater Screening Occupancy & Potential Box Office View
-CREATE OR REPLACE VIEW `view_screening_analytics` AS
-SELECT 
-    T.`theater_id`,
-    T.`name` AS `theater_name`,
-    TR.`room_number`,
-    TR.`screen_format`,
-    M.`title` AS `movie_title`,
-    TS.`screening_datetime`,
-    TR.`seating_capacity`,
-    TS.`ticket_price`,
-    (TR.`seating_capacity` * TS.`ticket_price`) AS `max_potential_revenue`
-FROM `theaters` T
-JOIN `theater_rooms` TR 
-    ON T.`theater_id` = TR.`theater_id`
-JOIN `theater_screenings` TS 
-    ON TR.`theater_id` = TS.`theater_id` AND TR.`room_number` = TS.`room_number`
-JOIN `movies` M 
-    ON TS.`movie_id` = M.`movie_id`;
-
--- View 6.2: Director Hall of Fame Analytics View
-CREATE OR REPLACE VIEW `view_director_leaderboard` AS
-SELECT 
-    FP.`person_id`,
-    FP.`name` AS `director_name`,
-    FP.`nationality`,
-    COUNT(DISTINCT M.`movie_id`) AS `total_films_directed`,
-    COUNT(R.`review_id`) AS `total_community_reviews`,
-    ROUND(AVG(R.`rating`), 2) AS `average_rating`,
-    COUNT(DISTINCT AN.`nomination_id`) AS `total_festival_nominations`,
-    SUM(CASE WHEN AN.`is_winner` = TRUE THEN 1 ELSE 0 END) AS `total_awards_won`
-FROM `film_professionals` FP
-JOIN `movie_cast_crew` MCC 
-    ON FP.`person_id` = MCC.`person_id` AND MCC.`role_type` = 'DIRECTOR'
-JOIN `movies` M 
-    ON MCC.`movie_id` = M.`movie_id`
-LEFT JOIN `reviews` R 
-    ON M.`movie_id` = R.`movie_id`
-LEFT JOIN `award_nominations` AN 
-    ON (AN.`movie_id` = M.`movie_id` OR AN.`person_id` = FP.`person_id`)
-GROUP BY FP.`person_id`, FP.`name`, FP.`nationality`;
