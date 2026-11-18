@@ -65,9 +65,9 @@ CREATE TABLE `movies` (
     CONSTRAINT `chk_movie_year` CHECK (`release_year` >= 1888),
     CONSTRAINT `chk_movie_duration` CHECK (`duration_minutes` > 0),
     CONSTRAINT `fk_movies_director` FOREIGN KEY (`director_id`)
-        REFERENCES `directors` (`director_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+        REFERENCES `directors` (`director_id`),
     CONSTRAINT `fk_movies_prequel` FOREIGN KEY (`prequel_movie_id`)
-        REFERENCES `movies` (`movie_id`) ON DELETE SET NULL ON UPDATE CASCADE
+        REFERENCES `movies` (`movie_id`)
 );
 
 -- --------------------------------------------------------------------
@@ -78,7 +78,7 @@ CREATE TABLE `movie_genres` (
     `genre_name` VARCHAR(50) NOT NULL,
     CONSTRAINT `pk_movie_genres` PRIMARY KEY (`movie_id`, `genre_name`),
     CONSTRAINT `fk_genres_movie` FOREIGN KEY (`movie_id`)
-        REFERENCES `movies` (`movie_id`) ON DELETE CASCADE ON UPDATE CASCADE
+        REFERENCES `movies` (`movie_id`)
 );
 
 -- --------------------------------------------------------------------
@@ -95,7 +95,7 @@ CREATE TABLE `reviews` (
     CONSTRAINT `uq_user_movie_review` UNIQUE (`user_id`, `movie_id`),
     CONSTRAINT `chk_review_rating` CHECK (`rating` BETWEEN 0 AND 5),
     CONSTRAINT `fk_reviews_user` FOREIGN KEY (`user_id`)
-        REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+        REFERENCES `users` (`user_id`),
     CONSTRAINT `fk_reviews_movie` FOREIGN KEY (`movie_id`)
-        REFERENCES `movies` (`movie_id`) ON DELETE CASCADE ON UPDATE CASCADE
+        REFERENCES `movies` (`movie_id`)
 );

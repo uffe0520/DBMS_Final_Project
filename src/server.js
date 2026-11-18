@@ -345,21 +345,35 @@ app.put('/api/movies/:id', async (req, res) => {
     }
 });
 
-// DELETE: Remove a movie (cascades to movie_genres and reviews; sets sequels' prequel_movie_id to NULL)
+// DELETE: Remove a movie explicitly in a transaction (clears sequel links, reviews, and genres before deleting the film)
 app.delete('/api/movies/:id', async (req, res) => {
     const movieId = parseInt(req.params.id, 10);
     if (isNaN(movieId)) {
         return res.status(400).json({ success: false, error: 'Invalid film identifier.' });
     }
 
+    const conn = await pool.getConnection();
     try {
-        const [result] = await pool.query(`DELETE FROM movies WHERE movie_id = ?;`, [movieId]);
-        if (result.affectedRows === 0) {
+        await conn.beginTransaction();
+
+        const [existing] = await conn.query(`SELECT movie_id FROM movies WHERE movie_id = ?;`, [movieId]);
+        if (existing.length === 0) {
+            await conn.rollback();
             return res.status(404).json({ success: false, error: 'Film not found.' });
         }
+
+        await conn.query(`UPDATE movies SET prequel_movie_id = NULL WHERE prequel_movie_id = ?;`, [movieId]);
+        await conn.query(`DELETE FROM reviews WHERE movie_id = ?;`, [movieId]);
+        await conn.query(`DELETE FROM movie_genres WHERE movie_id = ?;`, [movieId]);
+        await conn.query(`DELETE FROM movies WHERE movie_id = ?;`, [movieId]);
+
+        await conn.commit();
         res.json({ success: true, message: 'Film deleted.' });
     } catch (err) {
+        await conn.rollback();
         res.status(500).json({ success: false, error: err.message });
+    } finally {
+        conn.release();
     }
 });
 

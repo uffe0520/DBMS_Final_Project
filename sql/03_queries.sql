@@ -51,7 +51,7 @@ WHERE EXISTS (
 -- --------------------------------------------------------------------
 -- QUERY 2: Full Explicit CRUD Operations (Reviews & Movies)
 -- Purpose: Demonstrates parameterized CREATE, READ, UPDATE, DELETE
---          and referential integrity (ON DELETE CASCADE / SET NULL).
+--          while respecting strict Foreign Key referential integrity.
 -- --------------------------------------------------------------------
 
 -- [CREATE] Insert a new review (0-5 stars)
@@ -78,8 +78,13 @@ ORDER BY R.review_id DESC;
 -- SET rating = ?, review_text = ?, contains_spoilers = ?
 -- WHERE review_id = ?;
 
--- [DELETE] Remove a review (or delete a movie, cascading to genres/reviews)
+-- [DELETE] Remove a review directly, or remove a movie in dependency order
+--          within a transaction (respecting strict Foreign Keys without CASCADE):
 -- DELETE FROM reviews WHERE review_id = ?;
+--
+-- UPDATE movies SET prequel_movie_id = NULL WHERE prequel_movie_id = ?;
+-- DELETE FROM reviews WHERE movie_id = ?;
+-- DELETE FROM movie_genres WHERE movie_id = ?;
 -- DELETE FROM movies WHERE movie_id = ?;
 
 -- --------------------------------------------------------------------
