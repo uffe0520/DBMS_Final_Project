@@ -85,62 +85,17 @@ Open **[http://localhost:3001](http://localhost:3001)** in your browser.
 
 ---
 
-## 5. ER Model & Reduction to Relational Schema (5 Tables)
+## 5. Database Tables & Keys (5 Tables)
 
-Every table in `sql/01_schema.sql` is derived directly from the conceptual Entity-Relationship (ER) diagram using the standard ER-to-Relational reduction rules covered in COMP3278A, and every table is actively queried and mutated by the web application.
-
-### 5.1 Conceptual ER Diagram Components
-
-- **Strong Entity Sets:**
-  - **`User`**: `user_id` (PK), `username` (UNIQUE), `email` (UNIQUE)
-  - **`Director`**: `director_id` (PK), `name` (UNIQUE), `nationality`, `biography`
-  - **`Movie`**: `movie_id` (PK), `title`, `release_year`, `duration_minutes`, `language`, `synopsis`, `poster_url`, and multi-valued attribute **`{genre_name}`**
-- **Specialization / Generalization (ISA Hierarchy):**
-  - **`User`** has a **total and disjoint** specialization into two subclasses:
-    - **`Cinephile`**: `membership_tier` (`FREE`, `PRO`, `PATRON`)
-    - **`Critic`**: `publication_name`
-- **Relationship Sets:**
-
-| Relationship Set | Participating Entity Sets | Cardinality | Participation | Descriptive Attributes |
-|---|---|---|---|---|
-| **`Directs`** | `Director` ↔ `Movie` | `1 : N` (arrow to `Director`) | Partial on both | — |
-| **`HasPrequel`** | `Movie` (*sequel*) ↔ `Movie` (*prequel*) | Recursive `1 : N` (arrow to *prequel*) | Partial on both | — |
-| **`Reviews`** | `User` ↔ `Movie` | `M : N` | Partial on both | `rating` (0–5), `review_text`, `contains_spoilers` |
-
-### 5.2 Step-by-Step Reduction from ER Diagram to Relational Tables
-
-1. **Strong Entity Sets → Base Relations (`directors`, `movies`, `users`):**
-   Each strong entity set maps to a table containing all of its simple attributes and its primary key (`director_id`, `movie_id`, `user_id`).
-2. **Total & Disjoint ISA Specialization (`Cinephile` / `Critic` ISA `User`) → Single-Table Mapping (`users`):**
-   Because the specialization is **total and disjoint** and each subclass introduces only one specific attribute, the superclass and both subclasses are folded into a single `users` table with a discriminator attribute `role` (`'CINEPHILE'` or `'CRITIC'`). Disjointness and totality are enforced directly at the database level via `CHECK` constraint `chk_users_role_attrs` (a `CINEPHILE` must have `membership_tier` and `publication_name IS NULL`; a `CRITIC` must have `publication_name` and `membership_tier IS NULL`).
-3. **Many-to-One Relationship (`Directs`, `Director` 1 : N `Movie`) → Merge into the "Many" Side (`movies`):**
-   Rather than creating a separate relationship table, the primary key of the `1`-side entity (`directors.director_id`) is added as a nullable foreign key in the `N`-side table `movies` (`FOREIGN KEY (director_id) REFERENCES directors(director_id)`).
-4. **Recursive `1 : N` Relationship (`HasPrequel`) → Self-Referencing Foreign Key (`movies`):**
-   The recursive relationship is merged into `movies` by adding the nullable self-referencing foreign key `prequel_movie_id` referencing `movies(movie_id)`.
-5. **Multi-Valued Attribute (`Movie.{genre_name}`) → Separate Relation (`movie_genres`):**
-   To satisfy First Normal Form (1NF) and BCNF, the multi-valued attribute `genre_name` on `Movie` is extracted into its own relation `movie_genres(movie_id, genre_name)` with composite primary key `(movie_id, genre_name)` and foreign key `movie_id` referencing `movies(movie_id)`.
-6. **Many-to-Many Relationship (`Reviews`, `User` M : N `Movie`) → Separate Relationship Table (`reviews`):**
-   An `M:N` relationship cannot be merged into either entity table and therefore becomes its own relation `reviews` containing the foreign keys of both participating entities (`user_id` → `users`, `movie_id` → `movies`) plus all descriptive attributes (`rating`, `review_text`, `contains_spoilers`). A surrogate key `review_id` serves as the primary key for direct API updates/deletes, while `UNIQUE (user_id, movie_id)` enforces the natural candidate key (at most one review per user per film).
-
-### 5.3 Resulting Relational Schemas & Constraints
-
-- `users(`**`user_id`**`, username, email, role, membership_tier, publication_name)`
-- `directors(`**`director_id`**`, name, nationality, biography)`
-- `movies(`**`movie_id`**`, title, release_year, duration_minutes, language, synopsis, poster_url, director_id [FK → directors], prequel_movie_id [FK → movies])`
-- `movie_genres(`**`movie_id [FK → movies], genre_name`**`)`
-- `reviews(`**`review_id`**`, user_id [FK → users], movie_id [FK → movies], rating, review_text, contains_spoilers)`
-
-| Table | ER Construct Mapped | Purpose | Key Constraints |
-|---|---|---|---|
-| `users` | Strong Entity + Total/Disjoint ISA (`Cinephile`, `Critic`) | Community reviewers (`CINEPHILE` & `CRITIC`) | PK `user_id`, `UNIQUE (username)`, `UNIQUE (email)`, disjoint role-attribute `CHECK` |
-| `directors` | Strong Entity (`1`-side of `Directs`) | Film directors (`1:N` with `movies`) | PK `director_id`, `UNIQUE (name)` |
-| `movies` | Strong Entity + merged `1:N` `Directs` + recursive `HasPrequel` | Core film catalog with poster, director & franchise lineage | PK `movie_id`, `CHECK (release_year >= 1888)`, `CHECK (duration_minutes > 0)`, FK `director_id`, self-FK `prequel_movie_id` |
-| `movie_genres` | Multi-Valued Attribute (`Movie.{genre_name}`) | Multi-valued genres per film (1NF / BCNF) | Composite PK `(movie_id, genre_name)`, FK `movie_id` |
-| `reviews` | `M:N` Relationship Set with Descriptive Attributes | 0–5 star critiques linking users and films (`M:N`) | PK `review_id`, `UNIQUE (user_id, movie_id)`, `CHECK (rating BETWEEN 0 AND 5)`, FKs `user_id` & `movie_id` |
+- **`users`**: `user_id` (PK), `username` (UNIQUE), `email` (UNIQUE), `role` (`CINEPHILE` | `CRITIC`), `membership_tier` (`FREE` | `PRO` | `PATRON`, for `CINEPHILE`), `publication_name` (for `CRITIC`) — total & disjoint specialization enforced via `CHECK`
+- **`directors`**: `director_id` (PK), `name` (UNIQUE), `nationality`, `biography`
+- **`movies`**: `movie_id` (PK), `title`, `release_year` (`>= 1888`), `duration_minutes` (`> 0`), `language`, `synopsis`, `poster_url`, `director_id` (FK → `directors.director_id`), `prequel_movie_id` (FK → `movies.movie_id`)
+- **`movie_genres`**: `movie_id` (PK, FK → `movies.movie_id`), `genre_name` (PK) — multi-valued attribute `{genre_name}` of `movies`
+- **`reviews`**: `review_id` (PK), `user_id` (FK → `users.user_id`), `movie_id` (FK → `movies.movie_id`), `rating` (`0–5`), `review_text`, `contains_spoilers` — `UNIQUE (user_id, movie_id)`
 
 ---
 
-## 6. Application Features & Full CRUD Coverage
+## 6. Application Features
 
 - **Films Catalog (`Tab 1`):**
   - **Read & Search:** Filter by title, director, or genre via standard `EXISTS` (`GET /api/movies?q=`).
@@ -164,7 +119,7 @@ Every table in `sql/01_schema.sql` is derived directly from the conceptual Entit
 DBMS_Final_Project/
 ├── README.md
 ├── package.json
-├── posters/                  # Shared 2:3 movie posters + default_blank.svg (OS-independent uploads)
+├── posters/                  # Shared movie posters + default_blank.svg
 ├── sql/
 │   ├── 00_reset_db.sql       # Optional full database drop/recreate
 │   ├── 01_schema.sql         # 5-table BCNF schema definition
