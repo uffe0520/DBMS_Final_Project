@@ -1518,9 +1518,10 @@
                 const res = await fetch(`/api/leaderboard/films?filter=${encodeURIComponent(currentLeaderboardFilter)}`);
                 const data = await res.json();
                 if (data.success) {
+                    const formatScore = (val) => (val != null && !Number.isNaN(parseFloat(val))) ? `★ ${parseFloat(val).toFixed(2)}` : '—';
                     const metaEl = document.getElementById('leaderboard-meta');
                     if (metaEl) {
-                        const platAvg = data.platform_average !== null ? `★ ${parseFloat(data.platform_average).toFixed(2)}` : '—';
+                        const platAvg = formatScore(data.platform_average);
                         const countLabel = `${data.data.length} ${data.data.length === 1 ? 'Film' : 'Films'}`;
                         metaEl.textContent = `Platform Avg: ${platAvg} · ${countLabel}`;
                     }
@@ -1532,12 +1533,12 @@
                     }
                     tbody.innerHTML = data.data.map((f, idx) => {
                         const poster = f.poster_url || defaultPoster;
-                        const rangeText = f.min_rating !== null && f.max_rating !== null
+                        const rangeText = f.min_rating != null && f.max_rating != null
                             ? (f.min_rating === f.max_rating ? `${f.max_rating} ★` : `${f.min_rating} – ${f.max_rating} ★`)
                             : '—';
-                        const criticText = f.critic_avg !== null ? `★ ${parseFloat(f.critic_avg).toFixed(2)}` : '—';
-                        const cinephileText = f.cinephile_avg !== null ? `★ ${parseFloat(f.cinephile_avg).toFixed(2)}` : '—';
-                        const avgText = f.average_rating !== null ? `★ ${parseFloat(f.average_rating).toFixed(2)}` : '—';
+                        const criticText = formatScore(f.critic_avg);
+                        const cinephileText = formatScore(f.cinephile_avg);
+                        const avgText = formatScore(f.average_rating);
                         return `
                             <tr onclick="openReviewsModal(${f.movie_id}, '${escapeHtml(f.title).replace(/'/g, "\\'")}', '${escapeHtml(poster)}')" class="hover:bg-stone-50 transition cursor-pointer">
                                 <td class="px-5 py-3.5 font-mono text-xs font-bold text-stone-500">#${idx + 1}</td>
