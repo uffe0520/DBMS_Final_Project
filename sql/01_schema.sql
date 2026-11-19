@@ -59,7 +59,7 @@ CREATE TABLE `movies` (
     `language` VARCHAR(50) NOT NULL DEFAULT 'English',
     `synopsis` TEXT,
     `poster_url` VARCHAR(500) NULL,
-    `director_id` INT NULL,
+    `director_id` INT NOT NULL,
     `prequel_movie_id` INT NULL,
     CONSTRAINT `pk_movies` PRIMARY KEY (`movie_id`),
     CONSTRAINT `chk_movie_year` CHECK (`release_year` >= 1888),
