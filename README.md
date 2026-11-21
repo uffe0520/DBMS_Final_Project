@@ -5,87 +5,42 @@
 > **Database Scope:** 5 relational tables with full Create, Read, Update, and Delete (CRUD) operations.
 ---
 
-## 1. Prerequisites
+## 1. Running the App
 
-- **Node.js** v18+ (`node -v`) and **npm** (`npm -v`)
-- **MySQL Server** 8.x (`mysql --version`), running locally on `127.0.0.1:3306`
+**Requirements:** Node.js 18+ and MySQL 8, with the `filmcraft` database loaded from `sql/01_schema.sql` and `sql/02_seed_data.sql`.
 
----
+Open a terminal in the project folder (`DBMS_Final_Project/`), then follow the section for your system.
 
-## 2. Database Setup & Initial Data
-
-Run the two SQL scripts in order to create the `filmcraft` database, all 5 tables, and the initial dataset (6 users, 6 directors, 12 films with posters, genres, and 36 reviews):
-
-```bash
-mysql -u root < sql/01_schema.sql
-mysql -u root < sql/02_seed_data.sql
-```
-
-> If your MySQL `root` user requires a password, add `-p`:
-> ```bash
-> mysql -u root -p < sql/01_schema.sql
-> mysql -u root -p < sql/02_seed_data.sql
-> ```
-
-*(Optional)* Verify all key SQL queries directly in MySQL:
-```bash
-mysql -u root < sql/03_queries.sql
-```
-
----
-
-## 3. Configuration
-
-By default, `src/server.js` connects to MySQL using:
-
-| Variable | Default Value | Description |
-|---|---|---|
-| `DB_HOST` | `127.0.0.1` | MySQL server hostname |
-| `DB_PORT` | `3306` | MySQL server port |
-| `DB_USER` | `root` | MySQL username |
-| `DB_PASSWORD` | `""` (empty) | MySQL password |
-| `DB_NAME` | `filmcraft` | Database name |
-| `PORT` | `3001` | Local web server port |
-
-If your local MySQL instance uses a password or different credentials, pass them as environment variables when starting the server:
-
-```bash
-DB_USER=root DB_PASSWORD=your_password npm start
-```
-
----
-
-## 4. Installation & Run Instructions
-
-From the project root directory:
+### macOS
 
 ```bash
 npm install
 npm start
 ```
 
-You should see:
-```text
+If your MySQL `root` user has a password, start with this instead:
 
-The FilmCraft Web Server is running!
-Your Local URL: http://localhost:3001
-Enjoy with joy!
-
-Connected to MySQL `filmcraft` database
+```bash
+DB_PASSWORD='your MySQL password' npm start
 ```
 
-Open **[http://localhost:3001](http://localhost:3001)** in your browser.
+### Windows (PowerShell)
 
-### Stopping the Server
+```powershell
+npm install
+$env:DB_PASSWORD = "your MySQL password"
+npm start
+```
 
-- In the terminal window running `npm start`, press **`Ctrl + C`** (works on macOS, Linux, and Windows).
-- If the server is still running in the background on port `3001`:
-  - **macOS / Linux:** `lsof -ti :3001 | xargs kill`
-  - **Windows (PowerShell):** `Stop-Process -Id (Get-NetTCPConnection -LocalPort 3001).OwningProcess`
+If your MySQL `root` user has no password, skip the `$env:DB_PASSWORD` line.
+
+### Open the app
+
+Go to **[http://localhost:3001](http://localhost:3001)**. Press **`Ctrl + C`** in the terminal to stop the server.
 
 ---
 
-## 5. Database Tables & Keys (5 Tables)
+## 2. Database Tables & Keys (5 Tables)
 
 - **`users`**: `user_id` (PK), `username` (UNIQUE), `email` (UNIQUE), `role` (`CINEPHILE` | `CRITIC`), `membership_tier` (`FREE` | `PRO` | `PATRON`, for `CINEPHILE`), `publication_name` (for `CRITIC`) — total & disjoint specialization enforced via `CHECK`
 - **`directors`**: `director_id` (PK), `name` (UNIQUE), `nationality`, `biography`
@@ -95,7 +50,7 @@ Open **[http://localhost:3001](http://localhost:3001)** in your browser.
 
 ---
 
-## 6. Application Features
+## 3. Application Features
 
 - **Films Catalog (`Tab 1`):**
   - **Read & Search:** Filter by title, director, or genre via standard `EXISTS` (`GET /api/movies?q=`).
@@ -113,7 +68,7 @@ Open **[http://localhost:3001](http://localhost:3001)** in your browser.
 
 ---
 
-## 7. Repository Structure
+## 4. Repository Structure
 
 ```text
 DBMS_Final_Project/
