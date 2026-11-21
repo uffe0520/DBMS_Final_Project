@@ -1,6 +1,6 @@
-# FilmCraft — Cinema Review & Archive
+# FilmCraft - Cinema Review & Archive
 
-> **Course:** HKU COMP3278A — Introduction to Database Management Systems  
+> **Course:** HKU COMP3278A - Introduction to Database Management Systems  
 > **Stack:** MySQL 8.x · Node.js (Express) · HTML / Tailwind CSS  
 > **Database Scope:** 5 relational tables with full Create, Read, Update, and Delete (CRUD) operations.
 ---
@@ -42,11 +42,11 @@ Go to **[http://localhost:3001](http://localhost:3001)**. Press **`Ctrl + C`** i
 
 ## 2. Database Tables & Keys (5 Tables)
 
-- **`users`**: `user_id` (PK), `username` (UNIQUE), `email` (UNIQUE), `role` (`CINEPHILE` | `CRITIC`), `membership_tier` (`FREE` | `PRO` | `PATRON`, for `CINEPHILE`), `publication_name` (for `CRITIC`) — total & disjoint specialization enforced via `CHECK`
+- **`users`**: `user_id` (PK), `username` (UNIQUE), `email` (UNIQUE), `role` (`CINEPHILE` | `CRITIC`), `membership_tier` (`FREE` | `PRO` | `PATRON`), `publication_name` 
 - **`directors`**: `director_id` (PK), `name` (UNIQUE), `nationality`, `biography`
 - **`movies`**: `movie_id` (PK), `title`, `release_year` (`>= 1888`), `duration_minutes` (`> 0`), `language`, `synopsis`, `poster_url`, `director_id` (FK → `directors.director_id`), `prequel_movie_id` (FK → `movies.movie_id`)
-- **`movie_genres`**: `movie_id` (PK, FK → `movies.movie_id`), `genre_name` (PK) — multi-valued attribute `{genre_name}` of `movies`
-- **`reviews`**: `review_id` (PK), `user_id` (FK → `users.user_id`), `movie_id` (FK → `movies.movie_id`), `rating` (`0–5`), `review_text`, `contains_spoilers` — `UNIQUE (user_id, movie_id)`
+- **`movie_genres`**: `movie_id` (PK, FK → `movies.movie_id`), `genre_name` (PK) - multi-valued attribute `{genre_name}` of `movies`
+- **`reviews`**: `review_id` (PK), `user_id` (FK → `users.user_id`), `movie_id` (FK → `movies.movie_id`), `rating` (`0–5`), `review_text`, `contains_spoilers` - `UNIQUE (user_id, movie_id)`
 
 ---
 

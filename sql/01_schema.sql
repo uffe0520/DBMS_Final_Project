@@ -29,12 +29,8 @@ CREATE TABLE `users` (
     `publication_name` VARCHAR(100) NULL,
     CONSTRAINT `pk_users` PRIMARY KEY (`user_id`),
     CONSTRAINT `uq_users_username` UNIQUE (`username`),
-    CONSTRAINT `uq_users_email` UNIQUE (`email`),
-    CONSTRAINT `chk_users_role_attrs` CHECK (
-        (`role` = 'CINEPHILE' AND `membership_tier` IS NOT NULL AND `publication_name` IS NULL) OR
-        (`role` = 'CRITIC' AND `publication_name` IS NOT NULL AND `membership_tier` IS NULL)
-    ) -- This constraint ensures that roles are disjoint.
-);
+    CONSTRAINT `uq_users_email` UNIQUE (`email`)
+    );
 
 -- --------------------------------------------------------------------
 -- 2. Directors (1:N Relationship with Movies)
