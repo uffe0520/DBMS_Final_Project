@@ -17,7 +17,9 @@ Lucien Neale, 3036720486
 
 **Requirements:** Node.js 18+ and MySQL 8, with the `filmcraft` database loaded from `sql/01_schema.sql` and `sql/02_seed_data.sql`.
 
-Open a terminal in the project folder (`DBMS_Final_Project/`), then follow the section for your system.
+Add the folder to a suitable place
+
+Open a terminal in the project folder (`Group_25_code/`), then follow the section for your system.
 
 ### macOS
 
