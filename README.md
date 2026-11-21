@@ -5,7 +5,15 @@
 > **Database Scope:** 5 relational tables with full Create, Read, Update, and Delete (CRUD) operations.
 ---
 
-## 1. Running the App
+
+Contributors:
+Uffe Grøn Roepstorff, 3036713225
+Markus Thomasson, 3036719011
+Hanna Niwinska, 3036713873
+Lucien Neale, 3036720486
+
+
+## 1. Setting up the App
 
 **Requirements:** Node.js 18+ and MySQL 8, with the `filmcraft` database loaded from `sql/01_schema.sql` and `sql/02_seed_data.sql`.
 
@@ -64,7 +72,7 @@ Go to **[http://localhost:3001](http://localhost:3001)**. Press **`Ctrl + C`** i
   - **Delete:** Delete any review with live average-rating recalculation (`DELETE /api/reviews/:id`).
 - **Film Leaderboard (`Tab 3`):** Ranks films by overall average, min–max range, and Critic vs. Cinephile breakdown via derived tables in `FROM`, with filters for **Top-Rated (`>= ALL`)**, **Above Platform Avg (`HAVING` subquery)**, and **Critics' Choice** (`GET /api/leaderboard/films?filter=`).
 - **Director Leaderboard (`Tab 4`):** Multi-table `JOIN` + `GROUP BY` + `HAVING` director ranking (`GET /api/directors`).
-- **Completionist Challenge (`Tab 5`):** Relational Division finding reviewers who completed every catalogued film by any selected director (`GET /api/division?directorId=`).
+- **Completionist Challenge (`Tab 5`):** Relational Division finding reviewers who reviewed every catalogued film by any selected director (`GET /api/division?directorId=`).
 
 ---
 

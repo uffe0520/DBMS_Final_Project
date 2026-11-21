@@ -54,11 +54,7 @@ WHERE EXISTS (
 --          while respecting strict Foreign Key referential integrity.
 -- --------------------------------------------------------------------
 
--- [CREATE] Insert a new review (0-5 stars)
--- INSERT INTO reviews (user_id, movie_id, rating, review_text, contains_spoilers)
--- VALUES (?, ?, ?, ?, ?);
 
--- [READ] Retrieve all reviews for a given movie with reviewer details
 SELECT 
     R.review_id,
     U.username,
@@ -73,19 +69,6 @@ JOIN users U ON R.user_id = U.user_id
 WHERE R.movie_id = 7
 ORDER BY R.review_id DESC;
 
--- [UPDATE] Edit an existing review's rating, text, and spoiler flag
--- UPDATE reviews
--- SET rating = ?, review_text = ?, contains_spoilers = ?
--- WHERE review_id = ?;
-
--- [DELETE] Remove a review directly, or remove a movie in dependency order
---          within a transaction (respecting strict Foreign Keys without CASCADE):
--- DELETE FROM reviews WHERE review_id = ?;
---
--- UPDATE movies SET prequel_movie_id = NULL WHERE prequel_movie_id = ?;
--- DELETE FROM reviews WHERE movie_id = ?;
--- DELETE FROM movie_genres WHERE movie_id = ?;
--- DELETE FROM movies WHERE movie_id = ?;
 
 -- --------------------------------------------------------------------
 -- QUERY 3A: Film Leaderboard — Derived Tables in FROM (Critics vs. Cinephiles)
